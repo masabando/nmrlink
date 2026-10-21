@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NMRLink T1測定</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="toolbar">
+    <a class="brand" href="../../">NMRLink <span>T1測定</span></a>
+    <span id="connection" class="connection" role="status">未接続</span>
+    <nav aria-label="画面の切り替え"><select id="page-select" aria-label="表示するページ"><option value="./">測定</option><option value="./frequency.html">周波数調整</option><option value="./pulse.html">パルス校正</option><option value="./t1.html" selected>T1測定</option><option value="./t2.html">T2測定</option></select><a href="../../guide/t1.html">使い方</a></nav>
+  </header>
+  <main class="workspace">
+    <aside class="settings">
+      <section class="panel"><h2>装置への接続</h2><p class="hint">他の測定画面は先に切断してください。</p><div class="actions"><button id="connect">接続</button><button id="disconnect" disabled>切断</button></div><p id="support" class="hint"></p></section>
+      <form id="sweep-form" class="panel measurement-panel">
+        <fieldset id="settings"><legend>T1走査</legend>
+          <label>τ 開始 ms<input name="startMs" type="number" min="1" max="32767" value="5" required></label>
+          <label>τ 終了 ms<input name="endMs" type="number" min="1" max="32767" value="100" required></label>
+          <label>τ 刻み幅 ms<input name="stepMs" type="number" min="1" value="5" required></label>
+          <p id="plan" class="hint"></p><p id="time-estimate" class="hint" role="status" aria-live="polite"></p>
+          <label>固定周波数 Hz<input name="frequencyHz" type="number" min="1" max="2147483647" value="402000" required></label>
+          <label>90°パルス 周期数<input name="p90Cycles" type="number" min="1" max="32767" value="21" required></label>
+          <label>180°パルス 周期数<input name="p180Cycles" type="number" min="1" max="32767" value="42" required></label>
+          <label>繰り返し間隔 ms<input name="measurementIntervalMs" type="number" min="1" max="32767" value="200" required></label>
+          <label>各点の積算回数<input name="scans" type="number" min="1" max="32767" value="64" required></label>
+          <h2>全点共通の解析条件</h2>
+          <label>FFT開始 ms<input name="fftStartMs" type="number" min="0" max="40.96" step="0.02" value="1" required></label>
+          <label>FFT終了 ms<input name="fftEndMs" type="number" min="0" max="40.96" step="0.02" value="5" required></label>
+          <label>窓関数<select name="window"><option value="hann">Hann</option><option value="rect">矩形</option></select></label>
+          <label>ピーク探索下限 kHz<input name="minKHz" type="number" min="-25" max="25" step="0.1" value="-3" required></label>
+          <label>ピーク探索上限 kHz<input name="maxKHz" type="number" min="-25" max="25" step="0.1" value="3" required></label>
+        </fieldset>
+        <button id="start" class="primary full" type="submit" disabled>走査開始</button>
+        <button id="stop" class="full" type="button" disabled>現在の測定後に停止</button>
+        <p class="hint">180°(0°) → τ → 90°(0°)のDouble測定です。繰り返し間隔は最大τ＋40.96 msより長くし、回復に十分な時間を取ってください。停止は進行中の測定完了を待ちます。新しい走査では前回の記録を置き換えます。</p>
+      </form>
+      <section class="panel"><h2>実機なしで試す</h2><button id="demo" class="full">T1走査デモ</button><p class="hint">装置への命令を送らずに、一連の操作を試せます。</p></section>
+      <section class="panel"><h2>保存データを開く</h2><button id="open-json" class="full">全データJSONを開く</button><input id="json-file" type="file" accept=".json,application/json" hidden><p class="hint">再測定せずにグラフと各点のFID・FFTを確認できます。読み込み成功時に現在の記録を置き換えます。</p></section>
+    </aside>
+    <div class="results">
+      <section class="result-header"><div><p class="eyebrow">反転回復法 · 180° → τ → 90° → FID</p><h1>T1測定</h1></div><span id="source" class="source">未測定</span></section>
+      <p id="message" class="message" role="status">校正した周波数・パルス長を設定して、待ち時間τを変えて測定します。</p>
+      <section class="panel"><div class="plot-heading"><h2>T1・反転回復曲線</h2><button id="png" class="small" disabled>PNG保存</button></div><label>表示する信号 <select id="signal-view"><option value="signed">符号付き信号</option><option value="magnitude">絶対値</option><option value="quadrature">直交成分</option></select></label><p class="hint">近似は符号付き信号で行います。絶対値・直交成分は確認用の表示です。</p><div id="curve" class="graph empty">走査すると結果を表示します。</div><p id="curve-legend" class="legend">● 符号付き信号</p>
+        <p id="best" class="peak">T1：未測定</p><p id="fit" class="hint">近似結果：未測定</p>
+        <form id="fit-form"><fieldset id="fit-settings"><div class="actions"><label>近似開始 τ [ms]<input id="fit-from" type="number" value="5" min="1" step="any" required></label><label>近似終了 τ [ms]<input id="fit-to" type="number" value="100" min="1" step="any" required></label></div><button id="fit-update" type="submit" disabled>近似を更新</button></fieldset></form>
+        <p class="hint">モデル：A − B exp(−τ / T1)。回復が不十分でも近似を試み、注意書きを表示します。位相不一致や負・正の信号不足などで計算できない場合は理由を表示します。</p>
+      </section>
+      <section class="panel"><h2>共通位相基準</h2><p id="reference" class="hint">取得した全点のパワーと共通方向から基準を求めます。</p>
+        <form id="phase-form"><fieldset id="reference-settings"><div class="actions"><button id="auto-reference" type="button" disabled>自動基準に戻す</button><button id="set-reference" type="button" disabled>選択点を位相基準にする</button></div><label>追加位相補正 °<input id="phase-degrees" type="number" value="0" step="any" required></label><button id="apply-phase" type="submit" disabled>全点を再解析</button></fieldset></form>
+        <p class="hint">全点に同じ周波数・位相基準を使います。各点別の位相合わせはせず、信号の符号反転を残します。自動基準ではτに対して回復する方向を正に取ります。手動基準には回復後の正のFIDを選んでください。</p></section>
+      <section class="panel"><h2>測定点</h2><p class="hint">τのボタンを押すと、その点のFID・FFTを確認できます。</p><div class="sweep-table"><table><thead><tr><th>τ [ms]</th><th>符号付き信号</th><th>絶対値</th><th>直交成分</th></tr></thead><tbody id="points"></tbody></table></div></section>
+      <section class="panel"><h2 id="selected">選択点のFID・FFT</h2><div id="fid-graph" class="graph empty">点を選択してください。</div><div id="fft-graph" class="graph empty"></div><p id="graph-status" class="hint"></p><p class="hint">下のFFT図は±10 kHzを表示します。走査の評価は入力したピーク探索帯域内で行います。</p><button id="record-json" disabled>選択点の生データJSON</button></section>
+      <section class="panel"><h2>走査データを保存</h2><div class="actions"><button id="json" disabled>全データJSON</button><button id="csv" disabled>T1 CSV</button></div><p class="hint">全データJSONには各点の生データと走査・解析条件を保存します。選択点の生データJSONは測定画面の「JSONを開く」で再解析できます。保存前にページを閉じると記録は失われます。</p></section>
+    </div>
+  </main>
+  <script type="module" src="./t1.js"></script>
+</body>
+</html>

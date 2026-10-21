@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NMRLink 測定</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="toolbar">
+    <a class="brand" href="../../">NMRLink <span>測定</span></a>
+    <span id="connection" class="connection" role="status">未接続</span>
+    <nav aria-label="画面の切り替え"><select id="page-select" aria-label="表示するページ"><option value="./" selected>測定</option><option value="./frequency.html">周波数調整</option><option value="./pulse.html">パルス校正</option><option value="./t1.html">T1測定</option><option value="./t2.html">T2測定</option></select><a href="../../guide/standard.html">使い方</a></nav>
+  </header>
+  <main class="workspace">
+    <aside class="settings">
+      <section class="panel">
+        <h2>装置への接続</h2>
+        <p class="hint">通信用USBを接続して、ポートを選びます。</p>
+        <div class="actions">
+          <button id="connect" class="primary">接続</button>
+          <button id="disconnect" disabled>切断</button>
+        </div>
+        <p id="support" class="hint"></p>
+      </section>
+      <form id="measurement" class="panel">
+        <fieldset id="settings">
+          <legend>測定条件</legend>
+          <label>周波数 <span>Hz</span><input name="frequencyHz" type="number" min="1" max="2147483647" value="402000" required></label>
+          <div class="pulse-heading"><span>パルス</span><span>周期数</span><span>位相 [°]</span></div>
+          <div class="pulse-row"><span>第1</span><input aria-label="第1パルスの周期数" name="pulse1Cycles" type="number" min="0" max="32767" value="21" required><select aria-label="第1パルスの位相" name="phase1Degrees"><option>0</option><option>90</option><option>180</option><option>270</option></select></div>
+          <div class="pulse-row"><span>第2</span><input aria-label="第2パルスの周期数" name="pulse2Cycles" type="number" min="0" max="32767" value="42" required><select aria-label="第2パルスの位相" name="phase2Degrees"><option>0</option><option selected>90</option><option>180</option><option>270</option></select></div>
+          <p class="hint">パルス長はRFの周期数です。</p>
+          <label>パルス間隔 <span>ms</span><input name="pulseIntervalMs" type="number" min="0" max="32767" value="5" required></label>
+          <label>繰り返し間隔 <span>ms</span><input name="measurementIntervalMs" type="number" min="1" max="32767" value="200" required></label>
+          <label>積算回数 <span>回</span><input name="scans" type="number" min="1" max="32767" value="128" required></label>
+          <label>モード<select name="mode"><option value="single">Single</option><option value="double">Double</option></select></label>
+          <p id="time-estimate" class="hint" role="status" aria-live="polite"></p>
+          <button id="measure" class="primary full" disabled>測定する</button>
+        </fieldset>
+        <p class="hint">測定中の即時停止には対応していません。</p>
+      </form>
+      <section class="panel demo-panel">
+        <h2>実機なしで試す</h2>
+        <p class="hint">模擬FIDを表示します。装置への命令は送りません。</p>
+        <button id="demo" class="full">模擬FIDを表示</button>
+      </section>
+      <section class="panel">
+        <h2>保存したデータを開く</h2>
+        <p class="hint">NMRLinkの生データJSONを読み込みます。装置への命令は送りません。</p>
+        <button id="open-json" class="full">JSONを開く</button>
+        <input id="json-file" type="file" accept=".json,application/json" hidden>
+      </section>
+    </aside>
+    <div class="results">
+      <section class="result-header">
+        <div><p class="eyebrow">測定結果</p><h1>時間波形とスペクトル</h1></div>
+        <span id="source" class="source">未測定</span>
+      </section>
+      <p id="message" class="message" role="status">装置へ接続して測定するか、模擬FIDを表示してください。</p>
+      <p id="record-info" class="hint record-info">結果はこの画面だけに保持します。ページを閉じる前に保存してください。</p>
+      <p id="record-parameters" class="hint record-info"></p>
+      <section class="panel plot-panel">
+        <div class="plot-heading"><h2>FID・時間波形</h2><div class="plot-exports"><button id="fid-svg" class="small" disabled>SVG保存</button><button id="fid-png" class="small" disabled>PNG保存</button></div></div>
+        <p class="legend"><span class="ch1">● Data 1</span><span class="ch2">● Data 2</span><span>薄い青の帯：FFTの解析範囲</span></p>
+        <div id="fid-graph" class="graph empty">測定すると波形を表示します。</div>
+      </section>
+      <section class="panel analysis-panel">
+        <form id="analysis-form">
+          <div class="plot-heading"><h2>解析・表示</h2><button type="submit" class="small">再解析</button></div>
+          <div class="analysis-grid">
+            <label>FFT開始 [ms]<input name="startMs" type="number" min="0" max="40.96" step="0.02" value="1" required></label>
+            <label>FFT終了 [ms]<input name="endMs" type="number" min="0" max="40.96" step="0.02" value="5" required></label>
+            <label>窓関数<select name="window"><option value="hann">Hann</option><option value="rect">矩形</option></select></label>
+            <label>補正に使う末尾点数<input name="tailPoints" type="number" min="1" max="2048" step="1" value="100" required></label>
+            <label>FID表示終了 [ms]<input name="displayEndMs" type="number" min="0.02" max="40.96" step="0.02" value="10" required></label>
+            <label>FFT表示 [±kHz]<input name="frequencyLimitKHz" type="number" min="0.1" max="25" step="0.1" value="10" required></label>
+          </div>
+        </form>
+        <p id="analysis-status" class="hint" role="status">取得済みのデータを再解析します。再測定は行いません。</p>
+      </section>
+      <section class="panel plot-panel">
+        <div class="plot-heading"><h2>FFT・振幅スペクトル</h2><div class="plot-exports"><button id="fft-svg" class="small" disabled>SVG保存</button><button id="fft-png" class="small" disabled>PNG保存</button></div></div>
+        <p id="fft-peak" class="peak" role="status">最大ピーク：未測定</p>
+        <div id="fft-graph" class="graph empty">測定するとスペクトルを表示します。</div>
+        <p id="graph-status" class="hint"></p>
+      </section>
+      <section class="panel export-panel">
+        <h2>データを保存</h2>
+        <div class="actions"><button id="json" disabled>生データJSON</button><button id="fid-csv" disabled>FID CSV</button><button id="fft-csv" disabled>FFT CSV</button></div>
+        <p class="hint">JSONには補正前の全2048点を保存します。グラフの表示範囲では切り詰めません。</p>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

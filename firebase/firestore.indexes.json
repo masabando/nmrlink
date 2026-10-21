@@ -1,0 +1,15 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "results",
+      "fieldPath": "json",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "requests",
+      "fieldPath": "parametersJson",
+      "indexes": []
+    }
+  ]
+}

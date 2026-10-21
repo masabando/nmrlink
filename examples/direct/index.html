@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NMRLink 直接接続の最小サンプル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Noto Sans JP", sans-serif;
+      max-width: 48rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    button {
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 0.2rem 1rem;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: normal;
+    }
+
+    label {
+      display: block;
+      margin: 0.6rem 0;
+    }
+
+    input,
+    select {
+      margin-left: 0.5rem;
+      font-size: 18px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #f4f4f4;
+      padding: 1rem;
+    }
+
+    .graph {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 0;
+      padding: 0.5rem;
+      min-height: 5rem;
+    }
+
+    .graph svg { display: block; width: 100%; height: 280px; }
+    .graph-note { font-size: 0.85rem; color: #555; }
+    .channel-one { color: #176caa; }
+    .channel-two { color: #b34e25; }
+  </style>
+</head>
+
+<body>
+  <h1>NMRLink 直接接続の最小サンプル</h1>
+  <p><a href="https://github.com/masabando/nmrlink/tree/main/examples/direct">GitHubでコードを見る</a></p>
+  <p>
+    自作Web UIへの組み込み方を理解するための最小例です。条件は装置・試料に合わせて確認してください。
+  </p>
+  <button id="connect" type="button">接続</button>
+  <button id="disconnect" type="button" disabled>切断</button>
+
+  <form id="measurement">
+    <fieldset id="settings">
+      <legend>測定条件</legend>
+      <label>周波数 [Hz]<input name="frequencyHz" type="number" min="1" max="2147483647" value="402000" required></label>
+      <label>第1パルス [周期数]<input name="pulse1Cycles" type="number" min="0" max="32767" value="20" required></label>
+      <label>第1位相 [度]<select name="phase1Degrees">
+          <option>0</option>
+          <option>90</option>
+          <option>180</option>
+          <option>270</option>
+        </select></label>
+      <label>第2パルス [周期数]<input name="pulse2Cycles" type="number" min="0" max="32767" value="40" required></label>
+      <label>第2位相 [度]<select name="phase2Degrees">
+          <option>0</option>
+          <option selected>90</option>
+          <option>180</option>
+          <option>270</option>
+        </select></label>
+      <label>パルス間隔 [ms]<input name="pulseIntervalMs" type="number" min="0" max="32767" value="5" required></label>
+      <label>測定間隔 [ms]<input name="measurementIntervalMs" type="number" min="1" max="32767" value="200"
+          required></label>
+      <label>積算回数<input name="scans" type="number" min="1" max="32767" value="128" required></label>
+      <label>モード<select name="mode">
+          <option value="single">Single</option>
+          <option value="double">Double</option>
+        </select></label>
+      <button id="measure" type="submit" disabled>設定を送信して測定</button>
+    </fieldset>
+  </form>
+
+  <p>即時停止には未対応です。測定が完了するまで待ってください。</p>
+
+  <button id="download" type="button" disabled>生データJSONを保存</button>
+
+  <pre id="status" role="status">未接続</pre>
+
+  <section aria-labelledby="fid-heading">
+    <h2 id="fid-heading">FID・時間波形</h2>
+    <p class="graph-note"><span class="channel-one">青：Data 1</span> ／ <span class="channel-two">橙：Data 2</span>（ベースライン補正後）<br>縦軸は1〜5 msの信号に合わせます。範囲外の先頭信号はクリップ表示します。<br>薄い青の帯：FFT解析範囲（1〜5 ms）</p>
+    <figure id="fid-graph" class="graph">測定すると波形を表示します。</figure>
+  </section>
+
+  <section aria-labelledby="fft-heading">
+    <h2 id="fft-heading">FFT・振幅スペクトル</h2>
+    <p id="fft-peak" class="graph-note" role="status">最大ピーク：未測定</p>
+    <figure id="fft-graph" class="graph">測定するとスペクトルを表示します。</figure>
+  </section>
+  <p id="graph-status" class="graph-note" role="status">解析条件は固定です。保存するJSONには補正前の生データを保持します。</p>
+
+  <script type="module" src="./app.js"></script>
+</body>
+
+</html>

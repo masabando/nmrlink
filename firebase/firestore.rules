@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+    function accepting(deviceId) {
+      return get(/databases/$(database)/documents/devices/$(deviceId)).data.state
+        in ['idle', 'occupied', 'measuring', 'error'];
+    }
+    function validRequest() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['requestId', 'type', 'sessionId', 'parametersJson', 'mode', 'createdAt', 'status'])
+        && data.keys().hasOnly(['requestId', 'type', 'sessionId', 'parametersJson', 'mode', 'createdAt', 'status'])
+        && data.requestId is string && data.requestId.matches('^[a-zA-Z0-9-]{36}$')
+        && data.sessionId is string && data.sessionId.matches('^[a-zA-Z0-9-]{36}$')
+        && data.status == 'pending'
+        && data.createdAt == request.time
+        && data.type in ['acquire', 'heartbeat', 'measure', 'release']
+        && data.parametersJson is string && data.parametersJson.size() <= 2000
+        && ((data.type == 'measure' && data.mode in ['single', 'double'])
+          || (data.type != 'measure' && data.mode == '' && data.parametersJson == ''));
+    }
+    match /devices/{deviceId} {
+      // Policy-based viewing is intentionally a UI restriction, not a Rules ACL.
+      allow get: if signedIn();
+      allow list, write: if false;
+      match /requests/{uid} {
+        allow get: if signedIn() && request.auth.uid == uid;
+        allow create: if signedIn() && request.auth.uid == uid
+          && accepting(deviceId) && validRequest();
+        allow update: if signedIn() && request.auth.uid == uid
+          && accepting(deviceId) && validRequest()
+          && resource.data.status in ['done', 'failed', 'rejected']
+          && request.resource.data.requestId != resource.data.requestId
+          && request.time > resource.data.createdAt + duration.value(1, 's');
+        allow list, delete: if false;
+      }
+      match /results/{requestId} {
+        allow get: if signedIn();
+        allow list, write: if false;
+      }
+    }
+    // Admin SDK uses IAM and is responsible for agent leases and all state writes.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

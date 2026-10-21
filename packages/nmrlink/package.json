@@ -1,0 +1,22 @@
+{
+  "name": "nmrlink",
+  "version": "0.1.0",
+  "description": "A TypeScript/JavaScript library for controlling NMR hardware in the browser via the Web Serial API.",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "nmr",
+    "web-serial",
+    "typescript",
+    "hardware"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./graphs": "./src/graphs.js",
+    "./browser": "./src/browser.js"
+  },
+  "license": "MIT"
+}

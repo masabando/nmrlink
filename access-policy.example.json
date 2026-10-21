@@ -1,0 +1,8 @@
+{
+  "allowedDomains": [
+    "ktc.ac.jp"
+  ],
+  "allowedEmails": [],
+  "allowedEmailPatterns": [],
+  "deniedEmails": []
+}

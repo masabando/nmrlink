@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+!.env.example
+secrets/
+access-policy.json
+*-debug.log
+.firebase/
+
+examples/remote/config.js
+dist/
+.cache/
+outputs/
+
+.DS_Store

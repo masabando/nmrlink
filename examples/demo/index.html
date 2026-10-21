@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NMRLink ローカルデモ</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 58rem; margin: 2rem auto; padding: 0 1rem; color: #24313d; background: #fafbfc; }
+    h1 { margin-bottom: 0.5rem; }
+    .notice { background: #edf3f8; border-left: 4px solid #467190; padding: 1rem; }
+    section { background: white; border: 1px solid #dce2e7; padding: 1rem; margin: 1rem 0; border-radius: 6px; }
+    label { display: inline-block; margin: 0.4rem 1rem 0.4rem 0; }
+    button, select, input { font: inherit; padding: 0.4rem; }
+    button { margin: 0.4rem 0.4rem 0.4rem 0; cursor: pointer; }
+    input { width: 7rem; }
+    button:disabled { cursor: default; }
+    #status { min-height: 1.5em; }
+    canvas { width: 100%; height: 16rem; display: block; }
+    pre { white-space: pre-wrap; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>NMRLink <small>ローカルデモ</small></h1>
+  <p class="notice">実際のGoogleログイン・クラウド・NMR装置には接続しません。波形はデモ用の合成データです。</p>
+  <section>
+    <h2>1. 利用者を選ぶ</h2>
+    <label>模擬アカウント
+      <select id="user">
+        <option value="student-a">学生A — student-a@ktc.ac.jp</option>
+        <option value="student-b">学生B — student-b@ktc.ac.jp</option>
+        <option value="teacher">教職員 — teacher@ktc.ac.jp</option>
+        <option value="visitor">外部利用者 — visitor@example.com（利用不可）</option>
+      </select>
+    </label>
+    <button id="login" disabled>デモログイン</button>
+    <button id="logout" hidden>ログアウト</button>
+    <p id="account">未ログイン</p>
+    <a href="/?user=student-b" target="_blank" rel="noopener">別タブで学生Bを試す</a>
+  </section>
+  <section>
+    <h2>2. 装置を使う</h2>
+    <button id="acquire" disabled>利用開始・再開</button>
+    <p id="status" role="status">デモに接続中…</p>
+    <div id="controls" hidden>
+      <form id="measurement">
+        <fieldset id="settings">
+          <legend>模擬測定条件</legend>
+          <label>周波数 [Hz]<input name="frequencyHz" type="number" min="1" max="2147483647" value="402000" required></label>
+          <label>第1パルス [周期数]<input name="pulse1Cycles" type="number" min="0" max="32767" value="60" required></label>
+          <label>第1位相 [度]<select name="phase1Degrees"><option>0</option><option>90</option><option>180</option><option>270</option></select></label>
+          <label>第2パルス [周期数]<input name="pulse2Cycles" type="number" min="0" max="32767" value="120" required></label>
+          <label>第2位相 [度]<select name="phase2Degrees"><option>0</option><option selected>90</option><option>180</option><option>270</option></select></label>
+          <label>パルス間隔 [ms]<input name="pulseIntervalMs" type="number" min="0" max="32767" value="5" required></label>
+          <label>測定間隔 [ms]<input name="measurementIntervalMs" type="number" min="1" max="32767" value="200" required></label>
+          <label>積算回数<input name="scans" type="number" min="1" max="32767" value="1" required></label>
+          <label>モード<select name="mode"><option value="single">Single</option><option value="double">Double</option></select></label>
+          <button id="measure" type="submit">模擬測定</button>
+        </fieldset>
+      </form>
+      <p>待ち時間は約1.5秒です。測定条件と実際の待ち時間は連動しません。</p>
+      <button id="release">利用終了・データ削除</button>
+      <div id="release-confirm" hidden>
+        <p>必要な結果は保存しましたか？この利用のデータを削除して終了します。</p>
+        <button id="confirm-release">データを削除して終了</button>
+        <button id="cancel-release">戻る</button>
+      </div>
+    </div>
+  </section>
+  <section id="result-panel" hidden>
+    <h2>3. 波形と解析結果 <small>DEMO</small></h2>
+    <p id="summary"></p>
+    <canvas id="waveform" width="960" height="300" aria-label="合成波形：青がチャンネル1、橙がチャンネル2"></canvas>
+    <p id="waveform-description">青：チャンネル1 ／ 橙：チャンネル2。実測値ではありません。</p>
+    <form id="analysis-form">
+      <fieldset>
+        <legend>解析条件（再測定せず変更できます）</legend>
+        <label><input id="baseline-enabled" name="baselineEnabled" type="checkbox" checked>ベースライン補正</label>
+        <label>末尾の点数<input name="tailPoints" type="number" min="1" max="2048" value="100" required></label>
+        <label>FFT開始 [ms]<input name="startMs" type="number" min="0" step="any" value="1" required></label>
+        <label>FFT終了 [ms]<input name="endMs" type="number" min="0" step="any" value="5" required></label>
+        <label>窓関数<select name="window"><option value="hann">Hann</option><option value="rect">矩形</option></select></label>
+        <label>表示下限 [Hz]<input name="minimumHz" type="number" step="any" value="-2000" required></label>
+        <label>表示上限 [Hz]<input name="maximumHz" type="number" step="any" value="2000" required></label>
+        <button id="analyze" type="submit">解析を更新</button>
+      </fieldset>
+    </form>
+    <p>FFTの終了時刻は含みません。表示する周波数範囲は、FFTの計算範囲とは別です。</p>
+    <p id="baseline-summary"></p>
+    <p id="analysis-status" role="status"></p>
+    <canvas id="spectrum" width="960" height="300" aria-label="複素FFTの振幅スペクトル"></canvas>
+    <p>周波数は受信基準からの相対値 [Hz]。振幅は窓の重みの合計で正規化します。</p>
+    <button id="download-json">測定・解析JSONを保存</button>
+    <button id="download-csv">生データCSVを保存</button>
+    <button id="download-spectrum" disabled>FFT CSVを保存</button>
+  </section>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

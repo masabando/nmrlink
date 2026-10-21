@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NMRLink パルス校正</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="toolbar">
+    <a class="brand" href="../../">NMRLink <span>パルス校正</span></a>
+    <span id="connection" class="connection" role="status">未接続</span>
+    <nav aria-label="画面の切り替え"><select id="page-select" aria-label="表示するページ"><option value="./">測定</option><option value="./frequency.html">周波数調整</option><option value="./pulse.html" selected>パルス校正</option><option value="./t1.html">T1測定</option><option value="./t2.html">T2測定</option></select><a href="../../guide/pulse.html">使い方</a></nav>
+  </header>
+  <main class="workspace">
+    <aside class="settings">
+      <section class="panel"><h2>装置への接続</h2><p class="hint">他の測定画面は先に切断してください。</p><div class="actions"><button id="connect">接続</button><button id="disconnect" disabled>切断</button></div><p id="support" class="hint"></p></section>
+      <form id="sweep-form" class="panel measurement-panel">
+        <fieldset id="settings"><legend>パルス走査</legend>
+          <label>開始 周期数<input name="startCycles" type="number" min="1" max="32767" value="5" required></label>
+          <label>終了 周期数<input name="endCycles" type="number" min="1" max="32767" value="80" required></label>
+          <label>刻み幅 周期数<input name="stepCycles" type="number" min="1" value="5" required></label>
+          <p id="plan" class="hint"></p><p id="time-estimate" class="hint" role="status" aria-live="polite"></p>
+          <label>固定周波数 Hz<input name="frequencyHz" type="number" min="1" max="2147483647" value="402000" required></label>
+          <label>第1位相 °<select name="phase1Degrees"><option>0</option><option>90</option><option>180</option><option>270</option></select></label>
+          <label>繰り返し間隔 ms<input name="measurementIntervalMs" type="number" min="1" max="32767" value="200" required></label>
+          <label>各点の積算回数<input name="scans" type="number" min="1" max="32767" value="64" required></label>
+          <h2>全点共通の解析条件</h2>
+          <label>FFT開始 ms<input name="startMs" type="number" min="0" max="40.96" step="0.02" value="1" required></label>
+          <label>FFT終了 ms<input name="endMs" type="number" min="0" max="40.96" step="0.02" value="5" required></label>
+          <label>窓関数<select name="window"><option value="hann">Hann</option><option value="rect">矩形</option></select></label>
+          <label>ピーク探索下限 kHz<input name="minKHz" type="number" min="-25" max="25" step="0.1" value="-3" required></label>
+          <label>ピーク探索上限 kHz<input name="maxKHz" type="number" min="-25" max="25" step="0.1" value="3" required></label>
+        </fieldset>
+        <button id="start" class="primary full" type="submit" disabled>走査開始</button>
+        <button id="stop" class="full" type="button" disabled>現在の測定後に停止</button>
+        <p class="hint">第1パルスの周期数を変えてSingle測定します。停止は進行中の測定完了を待ちます。新しい走査では前回の記録を置き換えます。</p>
+      </form>
+      <section class="panel"><h2>実機なしで試す</h2><button id="demo" class="full">パルス走査デモ</button><p class="hint">装置への命令を送らずに、一連の操作を試せます。</p></section>
+      <section class="panel"><h2>保存データを開く</h2><button id="open-json" class="full">全データJSONを開く</button><input id="json-file" type="file" accept=".json,application/json" hidden><p class="hint">再測定せずにグラフと各点のFID・FFTを確認できます。読み込み成功時に現在の記録を置き換えます。</p></section>
+    </aside>
+    <div class="results">
+      <section class="result-header"><div><p class="eyebrow">90°・180°パルスの校正</p><h1>パルス校正</h1></div><span id="source" class="source">未測定</span></section>
+      <p id="message" class="message" role="status">共鳴周波数を固定して走査し、共通位相基準の符号付き信号で校正します。</p>
+      <section class="panel"><div class="plot-heading"><h2>ラビ振動・パルス周期数と信号</h2><button id="png" class="small" disabled>PNG保存</button></div><label>表示する信号 <select id="signal-view"><option value="magnitude">絶対値</option><option value="signed">符号付き信号</option></select></label><p class="hint">絶対値では振幅の山と谷を確認できます。符号反転は折り返して表示されます。</p><div id="curve" class="graph empty">走査すると結果を表示します。</div><p id="curve-legend" class="legend">● 信号の絶対値</p>
+        <p id="best" class="peak">実測の90°・180°候補：未測定</p><p id="fit" class="hint">近似結果：未測定</p>
+        <button id="adopt" disabled>近似値を候補欄へ</button>
+        <div class="actions"><label class="candidate">90°候補 周期数<input id="chosen90" type="number" readonly></label><label class="candidate">180°候補 周期数<input id="chosen180" type="number" readonly></label></div>
+        <p class="hint">候補は整数に丸めて表示します。装置への送信は行いません。測定画面に移る前に切断し、候補を確認して測定条件へ入力してください。</p>
+      </section>
+      <section class="panel"><h2>共通位相基準</h2><p id="reference" class="hint">取得した全点のパワーと共通方向から基準を求めます。</p>
+        <form id="phase-form"><fieldset id="reference-settings"><div class="actions"><button id="auto-reference" type="button" disabled>自動基準に戻す</button><button id="set-reference" type="button" disabled>選択点を位相基準にする</button></div><label>追加位相補正 °<input id="phase-degrees" type="number" value="0" step="any" required></label><button id="apply-phase" type="submit" disabled>全点を再解析</button></fieldset></form>
+        <p class="hint">全点に同じ周波数・位相基準を使います。各点別の位相合わせはせず、信号の符号反転を残します。自動基準では短い周期数の強い信号を正方向に揃えます。</p></section>
+      <section class="panel"><h2>測定点</h2><p class="hint">周期数のボタンを押すと、その点のFID・FFTを確認できます。</p><div class="sweep-table"><table><thead><tr><th>周期数</th><th>符号付き信号</th><th>絶対値</th><th>直交成分</th></tr></thead><tbody id="points"></tbody></table></div></section>
+      <section class="panel"><h2 id="selected">選択点のFID・FFT</h2><div id="fid-graph" class="graph empty">点を選択してください。</div><div id="fft-graph" class="graph empty"></div><p id="graph-status" class="hint"></p><p class="hint">下のFFT図は±10 kHzを表示します。走査の評価は入力したピーク探索帯域内で行います。</p><button id="record-json" disabled>選択点の生データJSON</button></section>
+      <section class="panel"><h2>走査データを保存</h2><div class="actions"><button id="json" disabled>全データJSON</button><button id="csv" disabled>校正CSV</button></div><p class="hint">全データJSONには各点の生データと走査・解析条件を保存します。選択点の生データJSONは測定画面の「JSONを開く」で再解析できます。保存前にページを閉じると記録は失われます。</p></section>
+    </div>
+  </main>
+  <script type="module" src="./pulse.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "nmrlink-server",
+  "version": "0.1.0",
+  "description": "A Node.js application and library for remote NMR control through Firebase.",
+  "private": true,
+  "type": "module",
+  "keywords": [
+    "nmr",
+    "serial",
+    "firebase",
+    "hardware"
+  ],
+  "dependencies": {
+    "firebase-admin": "^14.5.0",
+    "nmrlink": "0.1.0",
+    "serialport": "^13.0.0"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./browser": "./browser/remote-client.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "node src/start.js"
+  },
+  "license": "MIT"
+}

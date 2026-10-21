@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NMRLink 遠隔測定</title>
+  <style>
+    body { font-family: sans-serif; max-width: 50rem; margin: 2rem auto; padding: 0 1rem; }
+    button { margin: 0.5rem; padding: 0.5rem; }
+    textarea { width: 100%; min-height: 16rem; font-family: monospace; }
+    pre { white-space: pre-wrap; }
+    [hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <h1>NMRLink 遠隔測定</h1>
+  <p id="account">未ログイン</p>
+  <button id="login">Googleでログイン</button>
+  <button id="logout" hidden>ログアウト</button>
+  <button id="acquire" hidden>利用開始・再開</button>
+  <section id="controls" hidden>
+    <h2>測定条件</h2>
+    <p>値は例です。装置・試料に合わせて確認してください。</p>
+    <textarea id="parameters" aria-label="測定条件JSON"></textarea>
+    <select id="mode" aria-label="測定モード"><option value="single">Single</option><option value="double">Double</option></select>
+    <button id="measure">測定</button>
+    <button id="download" disabled>結果JSONを保存</button>
+    <button id="release">利用終了・データ削除</button>
+    <p>即時停止はできません。測定中は終了まで待ちます。</p>
+    <pre id="result"></pre>
+  </section>
+  <pre id="status" role="status">設定を読み込み中…</pre>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
