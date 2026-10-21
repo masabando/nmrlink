@@ -18,7 +18,7 @@ import { NMRGraphs } from "./packages/nmrlink/src/graphs.js";
 import { saveMeasurement } from "./packages/nmrlink/src/browser.js";
 ```
 
-[導入ガイド](https://masabando.github.io/nmrlink/guide/install.html)に、動かせる表示例とコピー用HTMLがあります。npmレジストリからのインストールは使用しません。
+[導入ガイド](https://masabando.github.io/nmrlink/guide/install.html)に、動かせる表示例とコピー用HTMLがあります。npmを使う自作UIでは `npm install nmrlink` で導入できます。
 
 ## 周波数を調整する
 
@@ -62,7 +62,7 @@ npm run demo
 | site / model | ドキュメントサイトの原稿・3Dモデル |
 | tests | 模擬通信・解析・画面用処理のテスト |
 
-npm workspacesで2つのパッケージを管理しています。`private: true` はnpmへの誤公開を防ぐ設定です。ソースを使う導入方法は上記ガイドを参照してください。JavaScriptのES modulesを提供しており、TypeScript型定義は含みません。
+npm workspacesで2つのパッケージを管理しています。npmでは `nmrlink` を配布します。ルートと `nmrlink-server` は `private: true` とし、npmへの公開対象から除外しています。ソースを使う導入方法は上記ガイドを参照してください。JavaScriptのES modulesを提供しており、TypeScript型定義は含みません。
 
 ## 開発の背景
 
@@ -70,7 +70,7 @@ npm workspacesで2つのパッケージを管理しています。`private: true
 
 ## 開発・検証
 
-依存パッケージ導入後、`npm test` で共通制御・通信・解析のテストを実行できます。`npm run docs:build` で公開サイトを生成し、`npm run docs:check` と `npm run test:docs` で確認します。
+依存パッケージ導入後、`npm test` で共通制御・通信・解析のテストを実行できます。`npm run test:package` で実際の配布アーカイブを独立プロジェクトにインストールして検証できます（npm公開は行いません）。`npm run docs:build` で公開サイトを生成し、`npm run docs:check` と `npm run test:docs` で確認します。
 
 検証済みと未確認の範囲は[確認状況](./docs/STATUS.md)、装置との通信は[通信仕様](./docs/PROTOCOL.md)、ドキュメントサイトの作業は[公開・保守手順](./docs/PAGES.md)を参照してください。
 

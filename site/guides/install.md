@@ -1,6 +1,6 @@
 # 導入する
 
-ビルドなしの静的HTMLから使えます。ライブラリはGitHubリポジトリから取得し、そのまま配信できます。npmレジストリからのインストールは使用しません。
+ビルドなしの静的HTMLから使えます。ライブラリはGitHubリポジトリから取得し、そのまま配信できます。npmを使うプロジェクトにも導入できます。
 
 ## リポジトリを取得する
 
@@ -36,6 +36,18 @@ import { saveMeasurement } from "./packages/nmrlink/src/browser.js";
 
 ## バンドラーで使う
 
-workspace内ではnmrlink、nmrlink/graphs、nmrlink/browserのパッケージ名でimportできます。静的ブラウザでは相対URLを使います。
+プロジェクトで次を実行します。
+
+```sh
+npm install nmrlink
+```
+
+```js
+import { NMRController, analyzeMeasurement } from "nmrlink";
+import { NMRGraphs } from "nmrlink/graphs";
+import { saveMeasurement } from "nmrlink/browser";
+```
+
+Viteなどのバンドラーから使えます。ブラウザへHTMLをそのまま配信する場合は、上記「静的HTMLで使う」の相対URLを使います。npmパッケージはES modules形式で、実行時依存パッケージはありません。TypeScript型定義は含みません。
 
 [最初の測定へ進む](./first.md)

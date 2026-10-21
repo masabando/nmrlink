@@ -16,7 +16,8 @@
     "docs:check": "node scripts/check-docs.js",
     "test:direct": "node --test tests/direct/*.test.js",
     "test:docs": "node --test tests/docs/*.test.js",
-    "test:standard": "node --test tests/standard/*.test.js"
+    "test:standard": "node --test tests/standard/*.test.js",
+    "test:package": "node scripts/test-package.js"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",
@@ -30,5 +31,5 @@
     "node": ">=22"
   },
   "license": "MIT",
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
