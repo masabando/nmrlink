@@ -1,6 +1,6 @@
 # 自作Web UIの作り方
 
-2026-10-21。最初は [直接接続サンプル](../examples/direct/README.md) のindex.htmlとapp.jsから読むと、画面とライブラリの境界を追えます。HTMLは画面構造、app.jsはフォームとイベント、ライブラリは操作・解析・描画・保存を担当します。
+最初は [直接接続サンプル](../examples/direct/README.md) のindex.htmlとapp.jsから読むと、画面とライブラリの境界を追えます。HTMLは画面構造、app.jsはフォームとイベント、ライブラリは操作・解析・描画・保存を担当します。
 
 ## 1. 必要な入口を選ぶ
 
@@ -10,7 +10,7 @@ import { NMRGraphs } from "./packages/nmrlink/src/graphs.js";
 import { saveMeasurement } from "./packages/nmrlink/src/browser.js";
 ```
 
-相対パスはHTMLの場所に合わせます。npmを使うバンドラーでは、それぞれnmrlink、nmrlink/graphs、nmrlink/browserです。現在は未公開なので、ここでの手順はチェックアウト内の利用です。
+相対パスはHTMLの場所に合わせます。npmを使うバンドラーでは、それぞれnmrlink、nmrlink/graphs、nmrlink/browserです。npmでは `npm install nmrlink` で導入できます。
 
 NMRControllerは直接接続を扱います。Node.js用transportを指定したNMRDeviceも渡せますが、RemoteClientの置き換えではありません。遠隔UIの利用開始・終了と操作権は [RemoteClient](./API.md) で管理します。遠隔から得たrecordも同じanalyzeMeasurementとNMRGraphsで解析・描画できます。
 

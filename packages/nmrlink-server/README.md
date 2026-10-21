@@ -32,9 +32,9 @@ try {
   await device.connect();
   const result = await device.measure({
     frequencyHz: 402000,
-    pulse1Cycles: 60,
+    pulse1Cycles: 21,
     phase1Degrees: 0,
-    pulse2Cycles: 120,
+    pulse2Cycles: 42,
     phase2Degrees: 90,
     pulseIntervalMs: 5,
     measurementIntervalMs: 200,
@@ -87,4 +87,4 @@ NodeSerialTransportは共通NMRDeviceが使うconnect、disconnect、write、rea
 
 ブラウザでは `nmrlink-server/browser` のRemoteClientを使います。パッケージのルートはNode.js専用です。静的配信では相対URLからbrowser/remote-client.jsを読み込みます。
 
-[APIリファレンス](../../docs/API.md) にRemoteClient、RemoteAgent、FirebaseStoreの役割とライフサイクルをまとめています。通常の管理者はnpm startを使い、RemoteAgentの内部メソッドを直接呼ぶ必要はありません。[確認状況](../../docs/STATUS.md) も参照してください。
+[APIリファレンス](../../docs/API.md) にRemoteClient、RemoteAgent、FirebaseStoreの役割とライフサイクルをまとめています。通常の管理者はnpm startを使い、RemoteAgentの内部メソッドを直接呼ぶ必要はありません。遠隔接続とNode.js実ポートの動作は実環境で未検証です。

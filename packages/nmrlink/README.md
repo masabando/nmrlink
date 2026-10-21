@@ -10,17 +10,7 @@
 npm install nmrlink
 ```
 
-GitHubリポジトリからソースを直接使うこともできます。ローカルで配布用アーカイブを作る場合は、リポジトリのルートで次を実行します。
-
-```sh
-npm pack --workspace nmrlink --ignore-scripts
-```
-
-作成された `nmrlink-0.1.1.tgz` を別プロジェクトへインストールできます。
-
-```sh
-npm install /path/to/nmrlink-0.1.1.tgz
-```
+ビルドなしの静的HTMLから使う方法は[導入ガイド](https://masabando.github.io/nmrlink/guide/install.html)を参照してください。
 
 ## 対応環境と配布内容
 

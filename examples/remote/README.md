@@ -10,6 +10,6 @@
 
 Web UIは静的HTML/JSだけです。秘密鍵や装置側の設定を公開フォルダに入れないでください。ブラウザ用クライアントはpackages/nmrlink-server/browser/remote-client.jsです。自作画面でも使えます。
 
-課金登録なしのSparkを前提に、AuthenticationとFirestoreだけを使います。Functions・Storageは不要です。実クラウドと実機の動作確認はまだです。
+課金登録なしのSparkを前提に、AuthenticationとFirestoreだけを使います。Functions・Storageは不要です。遠隔接続は実環境で未検証です。現時点での利用はお控えください。
 
-自作UIのRemoteClient契約は [APIリファレンス](../../docs/API.md)、検証済みの範囲は [確認状況](../../docs/STATUS.md) を参照してください。
+自作UIのRemoteClient契約は [APIリファレンス](../../docs/API.md) を参照してください。

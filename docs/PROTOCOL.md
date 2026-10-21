@@ -1,8 +1,6 @@
-# 試作機の通信仕様と実装メモ
+# 試作機の通信仕様
 
-## 根拠と確認範囲
-
-2026-10-19に、既存の `NMR/src/GUI8.py` のsend_parameters、run_wait_command、read_channel_data_comma_textと、`NMR/docs/protocol.js`、`NMR/docs/app.js` を照合しました。本書はホスト側コードから読み取った仕様です。ファームウェアの確認、今回のライブラリによる実機検証はまだ行っていません。
+[Pythonの原本](../original/GUI8.py)とホスト側の通信実装に基づく仕様です。ファームウェア仕様で確定していない項目は、その旨を記載しています。
 
 ## シリアル接続
 
@@ -40,41 +38,23 @@ Pythonの `struct.pack('<i7h', ...)` と同じ、符号付き整数・リトル�
 
 PoC互換の入力範囲：周波数は1〜2147483647、パルス周期数とパルス間隔は0〜32767、測定間隔と積算回数は1〜32767。位相は0・90・180・270度です。これらは符号付き整数の表現とPoC入力に基づく範囲であり、装置の安全な動作範囲を保証しません。
 
-周波数の4倍・1/4倍に関するマニュアル注記と実装の関係は未確認のため、自動変換しません。パルス周期数を時間へ自動変換する機能もまだ設けません。
+周波数の4倍・1/4倍に関するマニュアル注記と実装の関係は未確認のため、自動変換しません。パルス周期数を時間へ自動変換する機能は提供しません。
 
 ## 測定データ
 
 1行は `ch1,ch2` の符号付き10進整数です。2048点、サンプル間隔はPoC・Pythonで0.02 msとして扱っています。チャンネルの物理単位、ADCの有効範囲は未確認です。不正な行をゼロへ置き換えず、エラーにします。
 
-末尾100点の平均を引き、ゼロ方向へ整数化する補正は既存アプリ側の処理です。生データの解析とは分け、今回のプロトコル層には含めません。
+末尾100点の平均を引き、ゼロ方向へ整数化する補正は既存アプリ側の処理です。生データの解析とは分け、プロトコル層には含めません。
 
-## ファイルと変更方法
+## 実装
 
-- `packages/nmrlink/src/protocol.js`：装置の値、入力検証、コマンド・設定の生成、1行のサンプル解析
-- `packages/nmrlink/src/line-decoder.js`：シリアル受信バイトから改行までを組み立てる処理
-- `packages/nmrlink/src/index.js`：公開する関数の一覧
-- `packages/nmrlink/tests/protocol.test.js`：Python形式の固定ベクトル、PoCとの照合、受信分割・破損データの検証
+- `packages/nmrlink/src/protocol.js`：入力検証、コマンド・設定の生成、サンプル解析
+- `packages/nmrlink/src/line-decoder.js`：分割受信した行の組み立て
+- `packages/nmrlink/src/device.js`：測定手順
+- `packages/nmrlink-server/src/node-serial-transport.js`：Node.jsシリアル接続
 
-テストは開発用チェックとして既存PoCを相対参照します。配布ライブラリ自体はPoCに依存しません。独立リポジトリへ切り出す前に、照合用の固定フィクスチャへ移行する必要があります。
+設定適用・開始・完了の応答は、空行とerror／fail／rejectを拒否します。成功応答の厳密な文字列は未確定です。
 
-ルートで `npm test` を実行します。全体テストは先にルートでnpm installを実行します。ブラウザ版だけのテストは外部依存なしでnpm test --workspace nmrlinkを実行できます。ブラウザからは `packages/nmrlink/src/index.js` をES moduleとして読み込めますが、NMRDeviceによる接続・測定APIとexamples/direct/の最小サンプルもあります。
+Node.js接続は明示指定したポートを開き、DTR/RTSを有効にして1秒待機します。writeとdrainで送信完了を待ち、受信をLineDecoderへ渡します。clearInputはアプリ内の受信状態だけを消去し、OS側のflushは呼びません。Node.js接続の実環境での動作は未検証です。
 
-## 次の段階
-
-Web Serial接続と1回測定の手順を実装しました。次は実機で応答文字列・波形・切断を検証し、Node.js接続についても実機で検証します。装置の仕様変更時は本書、パケット生成、実際の通信例を使うテストを同時に更新します。
-
-## Web Serial接続・測定の検証
-
-2026-10-19に、模擬SerialPortをWHATWGのReadableStream／WritableStreamで構成して検証しました。Single／Doubleの繰り返し取得、分割受信、ロック解放、入力不正、同時操作拒否、不正波形、設定拒否、応答タイムアウト、抜線、選択キャンセルを扱います。実機・ブラウザ上での表示や選択画面の検証とは区別します。
-
-設定適用・開始・完了の応答は、空行とerror／fail／rejectを拒否するPoC相当の暫定判定です。完了文字列を厳密に照合するには、実機またはファームウェア仕様の確認が必要です。測定時間の見積もりもPoC由来です。
-
-2026-10-21には利用者のChrome画面でSingle測定の2048点取得とFID・FFT表示が報告されています。これは厳密な応答文字列・測定精度・異常復旧の確認とは区別します。その後のUI共通化後の実機再測定も未確認です。[確認状況](./STATUS.md) を参照してください。
-
-## Node.jsシリアル接続
-
-2026-10-20にpackages/nmrlink-server/src/node-serial-transport.jsを追加しました。serialportを使用し、同じNMRDeviceに接続します。装置コマンドと測定手順は共通部分を使用します。
-
-connectで明示したポートを開き、DTR/RTSをtrueにして1秒待機します。writeとdrainで送信完了を待ち、dataイベントをLineDecoderへ渡します。clearInputはアプリ内の受信状態だけを消去します。OS側の入出力を破棄するflushは呼びません。
-
-公式SerialPortMockで接続・測定・異常系を検証しています。Node.js用transportの実ポート・実機確認は保留です。公開APIと検証項目はサーバーパッケージのREADMEに記載しています。
+通信パケットと受信処理のテストは `npm test` で実行します。比較用の参照実装は `tests/fixtures/poc/` に含まれます。

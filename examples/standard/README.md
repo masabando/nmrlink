@@ -4,4 +4,4 @@
 
 HTTPSまたはlocalhostで、Web Serial対応ブラウザから開きます。公開サイトのメニュー「Web UI」から起動できます。生成・配信にはnmrlink/ルートでnpm run docs:buildを実行し、dist/pages/だけを配信します。
 
-利用手順は [標準Web UIで測定する](../../site/guides/standard.md) を参照してください。実機の操作確認は利用者が行い、変更後の確認は模擬データで行います。装置へのコマンドを勝手に再送しません。
+利用手順は [標準Web UIで測定する](../../site/guides/standard.md) を参照してください。通信エラー時に測定コマンドを自動再送することはありません。
