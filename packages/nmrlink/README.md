@@ -1,8 +1,6 @@
 # nmrlink
 
-近畿大学の近藤が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
-
-[researchmap：近藤 康](https://researchmap.jp/kondo_yasushi)
+[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
 
 [ドキュメント](https://masabando.github.io/nmrlink/) · [API](https://masabando.github.io/nmrlink/docs/API.html) · [標準Web UI](https://masabando.github.io/nmrlink/examples/standard/) · [GitHub](https://github.com/masabando/nmrlink)
 

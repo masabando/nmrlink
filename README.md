@@ -1,8 +1,6 @@
 # NMRLink
 
-近畿大学の近藤が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
-
-[researchmap：近藤 康](https://researchmap.jp/kondo_yasushi)
+[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
 
 [ドキュメント](https://masabando.github.io/nmrlink/) · [npm](https://www.npmjs.com/package/nmrlink) · [標準Web UI](https://masabando.github.io/nmrlink/examples/standard/) · [最小サンプル](./examples/direct/)
 
@@ -63,12 +61,12 @@ npm run demo
 | site / model | ドキュメントサイトの原稿・3Dモデル |
 | docs | 通信仕様・組み込み・ビルド手順 |
 | tests | 通信・解析・画面用処理のテスト |
-| [original](./original/) | 近畿大学の近藤から提供されたPythonプログラム |
+| [original](./original/) | [近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)から提供されたPythonプログラム |
 
 テストは `npm test`、配布物の独立インストール確認は `npm run test:package` で実行します。サイトの生成・参照確認は `npm run docs:build` と `npm run docs:check` です。[サイトのビルド手順](./docs/PAGES.md)も参照してください。
 
 ## 原本とライセンス
 
-近畿大学の近藤から提供された装置制御プログラムをもとに開発しています。許可を得て公開している[Pythonの原本](./original/)も参照できます。
+[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)から提供された装置制御プログラムをもとに開発しています。許可を得て公開している[Pythonの原本](./original/)も参照できます。
 
 NMRLink本体は[MITライセンス](./LICENSE)です。`original/` のPythonプログラムもMITライセンスです。第三者のライブラリ・素材には、それぞれのライセンスが適用されます。

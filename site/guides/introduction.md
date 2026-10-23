@@ -3,7 +3,7 @@
     <p class="hero-kicker">NMR × Web</p>
     <h1 id="intro-title">NMRLink</h1>
     <p class="hero-lead">NMR装置の測定と波形解析を、あなたのWeb UIに。</p>
-    <p>近畿大学の近藤が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。</p>
+    <p><a href="https://researchmap.jp/kondo_yasushi">近藤 康（近畿大学）</a>が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。</p>
     <div class="hero-actions"><a class="hero-primary" href="./guide/install.html">使い始める →</a><a href="./examples/standard/index.html">標準Web UIを開く</a></div>
   </div>
   <figure class="apparatus-card">
@@ -47,9 +47,7 @@ Single/Double測定、ベースライン補正、複素FFT、グラフ表示、J
 
 ## 開発の背景
 
-NMRLinkは、近畿大学の近藤から提供されたPython製の装置制御プログラムをもとに開発しています。オリジナルのPythonコードは、提供者の許可を得て[GitHubのoriginalフォルダ](https://github.com/masabando/nmrlink/tree/main/original)で公開しています。
-
-[researchmap：近藤 康](https://researchmap.jp/kondo_yasushi)
+NMRLinkは、[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)から提供されたPython製の装置制御プログラムをもとに開発しています。オリジナルのPythonコードは、提供者の許可を得て[GitHubのoriginalフォルダ](https://github.com/masabando/nmrlink/tree/main/original)で公開しています。
 
 ## ライセンス
 

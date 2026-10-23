@@ -1,8 +1,6 @@
 # オリジナルの装置制御プログラム
 
-近畿大学の近藤から提供されたPython製のNMR装置制御プログラムです。提供者の許可を得て公開しています。NMRLinkは、このプログラムの通信手順をもとに開発しています。
-
-[researchmap：近藤 康](https://researchmap.jp/kondo_yasushi)
+[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)から提供されたPython製のNMR装置制御プログラムです。提供者の許可を得て公開しています。NMRLinkは、このプログラムの通信手順をもとに開発しています。
 
 ## ファイル
 
