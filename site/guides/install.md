@@ -34,6 +34,8 @@ import { saveMeasurement } from "./packages/nmrlink/src/browser.js";
 
 スマホでこのサイトや模擬グラフを閲覧できます。実機との直接接続には対応ブラウザと接続した端末を使います。file: URLではなくWebサーバーから配信してください。
 
+Linuxで実機に接続する場合は、[接続と切断のLinux向け案内](./connection.md)でシリアルポートの権限を確認してください。
+
 ## バンドラーで使う
 
 プロジェクトで次を実行します。
