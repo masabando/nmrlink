@@ -1,8 +1,16 @@
 # nmrlink
 
-教育用NMR装置の制御・波形解析・グラフを自分のWeb UIへ組み込むJavaScriptライブラリです。Web Serial APIによる接続、Single/Double測定、FID・FFT、周波数走査、パルス校正、T1・T2測定に対応します。
+近畿大学の近藤が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
+
+[researchmap：近藤 康](https://researchmap.jp/kondo_yasushi)
 
 [ドキュメント](https://masabando.github.io/nmrlink/) · [API](https://masabando.github.io/nmrlink/docs/API.html) · [標準Web UI](https://masabando.github.io/nmrlink/examples/standard/) · [GitHub](https://github.com/masabando/nmrlink)
+
+## 対象装置と入手について
+
+実際の測定には、対応する学生実験用NMR装置が必要です。一般のNMR装置を共通に制御するライブラリではありません。実機なしでも、模擬データによる表示や操作のデモを試せます。
+
+装置は教材販売会社を通じての販売が計画されています。
 
 ## 導入
 
@@ -120,4 +128,4 @@ console.log(svg.fid); // SVG文字列。Node.jsでも生成できます。
 
 MIT。作者：Masamitsu Bando。配布物内のLICENSEを参照してください。
 
-GitHubの `original/` にある提供元のPythonプログラムはこのnpmパッケージに含めず、NMRLinkのMITライセンスの対象外です。
+GitHubの `original/` にある提供元のPythonプログラムもMITライセンスで公開しています。このnpmパッケージには含みません。

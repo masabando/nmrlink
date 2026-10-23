@@ -20,5 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Scope: The original/ directory is excluded from this license; its license
-has not been determined. Third-party materials retain their own licenses.
+Scope and attribution:
+- NMRLink software and documentation: Copyright (c) 2026 Masamitsu Bando.
+- Original Python program (original/GUI8.py): Copyright (c) 2026 Yasushi Kondo,
+  distributed under the MIT License in original/LICENSE:
+  https://github.com/masabando/nmrlink/blob/main/original/LICENSE
+- Third-party materials retain their own copyright notices and licenses.
