@@ -75,3 +75,26 @@ window.addEventListener("message", event => {
     if (frame.contentWindow === event.source) frame.style.height = `${Math.ceil(height)}px`;
   }
 });
+
+// Explicit UTC dates avoid stale relative-period results from the download API.
+const downloadsBadge = document.querySelector("#npm-downloads-badge");
+if (downloadsBadge) {
+  const end = new Date();
+  end.setUTCHours(0, 0, 0, 0);
+  end.setUTCDate(end.getUTCDate() - 1);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 29);
+  const date = value => value.toISOString().slice(0, 10);
+  const range = `${date(start)}:${date(end)}`;
+  const query = new URLSearchParams({
+    url: `https://api.npmjs.org/downloads/point/${range}/nmrlink`,
+    query: "$.downloads",
+    label: "downloads",
+    suffix: "/30 days",
+    logo: "npm",
+    style: "flat",
+  });
+  downloadsBadge.alt = "npm直近30日間のダウンロード数";
+  downloadsBadge.title = `${date(start)}〜${date(end)} (UTC)`;
+  downloadsBadge.src = `https://img.shields.io/badge/dynamic/json?${query}`;
+}

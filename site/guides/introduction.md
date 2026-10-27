@@ -5,6 +5,17 @@
     <p class="hero-lead">NMR装置の測定と波形解析を、あなたのWeb UIに。</p>
     <p><a href="https://researchmap.jp/kondo_yasushi">近藤 康（近畿大学）</a>が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。</p>
     <div class="hero-actions"><a class="hero-primary" href="./guide/install.html">使い始める →</a><a href="./examples/standard/index.html">標準Web UIを開く</a></div>
+    <div class="project-badges" aria-label="パッケージと開発状況">
+      <div class="project-badges-row">
+        <a href="https://github.com/masabando/nmrlink/tags"><img alt="最新のGitHubタグ" src="https://img.shields.io/github/v/tag/masabando/nmrlink?style=flat&amp;label=version" height="20" /></a>
+        <a href="https://www.npmjs.com/package/nmrlink"><img id="npm-downloads-badge" alt="npm直近30日間のダウンロード数（読み込み中）" src="https://img.shields.io/badge/downloads-loading-lightgrey?style=flat&amp;logo=npm" height="20" /></a>
+      </div>
+      <div class="project-badges-row">
+        <a href="https://github.com/masabando/nmrlink/stargazers"><img alt="GitHubスター数" src="https://img.shields.io/github/stars/masabando/nmrlink?style=flat&amp;logo=github" height="20" /></a>
+        <a href="https://github.com/masabando/nmrlink/commits/main/"><img alt="最終コミット" src="https://img.shields.io/github/last-commit/masabando/nmrlink?style=flat" height="20" /></a>
+        <a href="https://github.com/masabando/nmrlink/actions/workflows/pages.yml"><img alt="ドキュメントのビルド状況" src="https://img.shields.io/github/actions/workflow/status/masabando/nmrlink/pages.yml?branch=main&amp;style=flat&amp;label=docs" height="20" /></a>
+      </div>
+    </div>
   </div>
   <figure class="apparatus-card">
     <div id="apparatus-view" class="apparatus-view"><span class="apparatus-label">NMR APPARATUS</span></div>
