@@ -1,5 +1,10 @@
 # NMRLink
 
+[![version](https://img.shields.io/github/v/tag/masabando/nmrlink?style=flat&label=version)](https://github.com/masabando/nmrlink/tags)
+[![GitHub stars](https://img.shields.io/github/stars/masabando/nmrlink?style=flat&logo=github)](https://github.com/masabando/nmrlink/stargazers)
+[![last commit](https://img.shields.io/github/last-commit/masabando/nmrlink?style=flat)](https://github.com/masabando/nmrlink/commits/main/)
+[![docs build](https://img.shields.io/github/actions/workflow/status/masabando/nmrlink/pages.yml?branch=main&style=flat&label=docs)](https://github.com/masabando/nmrlink/actions/workflows/pages.yml)
+
 [近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
 
 [ドキュメント](https://masabando.github.io/nmrlink/) · [npm](https://www.npmjs.com/package/nmrlink) · [標準Web UI](https://masabando.github.io/nmrlink/examples/standard/) · [最小サンプル](./examples/direct/)

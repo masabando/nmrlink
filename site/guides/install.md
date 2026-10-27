@@ -53,3 +53,7 @@ import { saveMeasurement } from "nmrlink/browser";
 Viteなどのバンドラーから使えます。ブラウザへHTMLをそのまま配信する場合は、上記「静的HTMLで使う」の相対URLを使います。npmパッケージはES modules形式で、実行時依存パッケージはありません。TypeScript型定義は含みません。
 
 [最初の測定へ進む](./first.md)
+
+## AIと一緒にWeb UIを作る
+
+[AI向けドキュメント（llms.txt）](../llms.txt)に、導入方法・API・最小コード例・制約をまとめています。AIにこのファイルのURLや内容を渡し、自作Web UIの実装に利用できます。渡し方と依頼文の例は[AIと一緒にWeb UIを作る](./ai.md)を参照してください。

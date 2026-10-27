@@ -12,7 +12,7 @@ const { version } = JSON.parse(await readFile(path.join(root, "package.json"), "
 const pages = [
   ["site/guides/introduction.md", "index.html", "紹介"],
   ...[
-    ["install", "導入する"], ["first", "最初の測定"],
+    ["install", "導入する"], ["first", "最初の測定"], ["ai", "AIと一緒にWeb UIを作る"],
     ["connection", "接続と切断"], ["parameters", "測定条件"], ["measurement", "測定する"], ["state", "状態とエラー"],
     ["frequencygraph", "周波数応答を描く"], ["pulsegraph", "パルス応答を描く"], ["relaxationgraph", "T1回復曲線を描く"], ["echograph", "T2減衰曲線を描く"],
     ["fid", "FIDを表示する"], ["fft", "FFTを表示する"], ["range", "解析範囲を変える"], ["colors", "線の色を変える"], ["save", "データを保存する"],
@@ -32,6 +32,7 @@ const pages = [
   ["site/guides/node.md", "guide/node.html", "Node.jsから使う"],
 ];
 const destinations = new Map(pages.map(([source, target]) => [source, target]));
+destinations.set("site/llms.txt", "llms.txt");
 const escape = value => value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 const relative = (from, to) => {
   const url = path.posix.relative(path.posix.dirname(from), to) || path.posix.basename(to);
@@ -76,7 +77,7 @@ for (const [source, target, title] of pages) {
   const groups = [
     ["Web UI", ["examples/standard/index.html", "examples/standard/frequency.html", "examples/standard/pulse.html", "examples/standard/t1.html", "examples/standard/t2.html", "examples/direct/index.html"]],
     ["Web UIの使い方", ["guide/standard.html", "guide/frequency.html", "guide/pulse.html", "guide/t1.html", "guide/t2.html"]],
-    ["はじめる", ["index.html", "guide/install.html", "guide/first.html", "examples/demo/index.html"]],
+    ["はじめる", ["index.html", "guide/install.html", "guide/first.html", "guide/ai.html", "examples/demo/index.html"]],
     ["装置を使う", ["guide/connection.html", "guide/parameters.html", "guide/measurement.html", "guide/state.html", "guide/node.html"]],
     ["データを扱う", ["guide/fid.html", "guide/fft.html", "guide/range.html", "guide/frequencygraph.html", "guide/pulsegraph.html", "guide/relaxationgraph.html", "guide/echograph.html", "guide/colors.html", "guide/save.html"]],
     ["遠隔で使う", ["guide/remote.html", "docs/FIREBASE.html", "guide/remote-ui.html"]],
@@ -90,6 +91,7 @@ for (const [source, target, title] of pages) {
     return `<section class="nav-group"><h2>${label}${label === "遠隔で使う" ? ' <span class="status-badge">未検証</span>' : ""}</h2>${links}</section>`;
   }).join("\n") + `
 <section class="nav-group"><h2>関連リンク</h2>
+<a href="${relative(target, "llms.txt")}">AI向けドキュメント（llms.txt）</a>
 <a href="https://alice.helixcode.net/~bando/">Masamitsu Bando</a>
 <a href="https://alice.helixcode.net/~bando/Lab/">Bando Lab</a>
 </section>`;
@@ -147,5 +149,6 @@ await mkdir(path.join(output, "model"), { recursive: true });
 await copyFile(path.join(root, "model/nmr_apparatus.glb"), path.join(output, "model/nmr_apparatus.glb"));
 await copyFile(path.join(root, "node_modules/three/LICENSE"), path.join(output, "assets/three-LICENSE.txt"));
 await copyFile(path.join(root, "LICENSE"), path.join(output, "LICENSE.txt"));
+await copyFile(path.join(root, "site/llms.txt"), path.join(output, "llms.txt"));
 await writeFile(path.join(output, ".nojekyll"), "");
 console.log(`Built ${pages.length} documentation pages and the direct sample in dist/pages/.`);

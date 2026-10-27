@@ -1,0 +1,170 @@
+# NMRLink
+
+> JavaScript library for controlling a specific educational NMR apparatus developed by Yasushi Kondo (Kindai University). Use it to build custom browser UIs for device control, FID acquisition, FFT analysis, calibration, and T1/T2 measurements.
+
+## Scope and environment
+
+- Actual measurements require the compatible physical NMR apparatus. This is not a universal interface for arbitrary NMR spectrometers or a quantum circuit execution SDK.
+- The apparatus is intended for student experiments and quantum information education. Distribution through an educational equipment vendor is planned.
+- Direct connection uses the Web Serial API in a supported desktop browser, over HTTPS or localhost. A serial port must be selected from a user click.
+- Linux users need permission to access the serial device. On Debian-based systems this may require dialout membership followed by desktop logout/login. Browser packaging may impose additional device access restrictions; do not assume a particular Snap workaround.
+- Framework independent JavaScript ES modules. No CommonJS build, TypeScript declarations, or runtime dependencies in nmrlink.
+- NMRLink and the original Python program are MIT licensed, with separate author notices. Original Python is in the GitHub original/ directory, not in the npm package.
+
+## Install and imports
+
+    npm install nmrlink
+
+For a browser app using a bundler such as Vite:
+
+```js
+import { NMRController, analyzeMeasurement } from "nmrlink";
+import { NMRGraphs } from "nmrlink/graphs";
+import { saveMeasurement, readMeasurement, saveGraphPng } from "nmrlink/browser";
+```
+
+For static HTML without a build, obtain the repository and serve it from a web server. If the HTML is at the repository root, use these relative module URLs instead:
+
+```js
+import { NMRController, analyzeMeasurement } from "./packages/nmrlink/src/index.js";
+import { NMRGraphs } from "./packages/nmrlink/src/graphs.js";
+import { saveMeasurement } from "./packages/nmrlink/src/browser.js";
+```
+
+Bare package names do not resolve in a plain browser without an import map or bundler. Do not serve a checkout containing private remote-server credentials.
+
+## Minimal direct-connection UI
+
+The following HTML and JavaScript are for a bundler-based browser app. Parameter values are examples, not universal calibrated settings.
+
+```html
+<button id="connect">接続</button>
+<button id="measure" disabled>測定</button>
+<button id="disconnect" disabled>切断</button>
+<button id="save" disabled>生データJSONを保存</button>
+<p id="status" role="status">未接続</p>
+<div id="fid"></div>
+<div id="fft"></div>
+```
+
+```js
+import { NMRController, analyzeMeasurement } from "nmrlink";
+import { NMRGraphs } from "nmrlink/graphs";
+import { saveMeasurement } from "nmrlink/browser";
+
+const get = id => document.getElementById(id);
+const controller = new NMRController();
+const graphs = new NMRGraphs({ fid: get("fid"), fft: get("fft") });
+
+// 装置・試料に合わせて確認する値です。校正済みの値へ変更してください。
+const parameters = {
+  frequencyHz: 402000,
+  pulse1Cycles: 21, phase1Degrees: 0,
+  pulse2Cycles: 42, phase2Degrees: 90,
+  pulseIntervalMs: 5, measurementIntervalMs: 200, scans: 128,
+};
+
+controller.onStateChange(state => {
+  get("connect").disabled = !state.canConnect;
+  get("measure").disabled = !state.canMeasure;
+  get("disconnect").disabled = !state.canDisconnect;
+});
+controller.onError(error => { get("status").textContent = error.message; });
+controller.onResult(record => {
+  get("save").disabled = false;
+  try {
+    graphs.show(record, analyzeMeasurement(record));
+    get("status").textContent = "測定が完了しました。";
+  } catch (error) {
+    graphs.clear();
+    get("status").textContent = `解析できませんでした：${error.message}`;
+  }
+});
+
+// ポート選択はクリックから直接呼び出します。
+get("connect").onclick = () => controller.connect();
+get("measure").onclick = () => controller.measure(parameters, { mode: "single" });
+get("disconnect").onclick = () => controller.disconnect();
+get("save").onclick = () => {
+  if (controller.result) saveMeasurement(controller.result);
+};
+```
+
+
+## Operation contracts
+
+- NMRController is the convenient UI layer. connect(), measure(), disconnect(), and sweep methods return operation results: { ok: true, value } or { ok: false, error }. Check ok before displaying success. onError receives failures.
+- onStateChange runs immediately on subscription. Use canConnect, canMeasure, canDisconnect, busy and hasResult to control the UI. Read form fields before initiating the operation, because disabled fields are omitted by FormData.
+- onResult receives a measurement record. controller.result retains the latest successful record. Failed measurements do not replace it.
+- NMRDevice is the lower-level interface. Its async operations reject on error; use try/catch. Do not treat its return type as a controller operation result.
+- There is no immediate hardware stop command. Disconnect is not an emergency stop. Sweeps can stop after the current measurement completes.
+- Do not automatically retry a failed measurement or silently replay queued operations.
+- On UI teardown, wait for the active operation to finish, disconnect, then call graphs.dispose() and controller.dispose(). dispose() alone does not stop or disconnect hardware.
+
+## Parameters and raw records
+
+All measurement parameters are required integers:
+- frequencyHz: 1..2147483647, Hz.
+- pulse1Cycles, pulse2Cycles: 0..32767, RF cycle counts, not microseconds.
+- phase1Degrees, phase2Degrees: 0, 90, 180, or 270 degrees.
+- pulseIntervalMs: 0..32767, ms.
+- measurementIntervalMs: 1..32767, ms.
+- scans: 1..32767, accumulation count.
+
+These are communication-format limits, not a guarantee of suitable physical operating conditions.
+A record contains source (instrument or demo), acquiredAt (UTC ISO timestamp), mode (single or double), parameters, points (2048), sampleIntervalMs (0.02), and raw (2048 pairs of channel values). Preserve raw, source, and acquisition conditions during analysis and saving. Do not overwrite raw with baseline-corrected values.
+
+## Analysis, graphs, and saving
+
+```js
+const analysis = analyzeMeasurement(record, {
+  startMs: 1,
+  endMs: 5,
+  window: "hann",
+});
+console.log(analysis.peak.hz);
+graphs.show(record, analysis);
+saveMeasurement(record);
+```
+
+analyzeMeasurement returns data, baseline, spectrum, and peak. Default baseline correction subtracts the mean of the final 100 points and truncates toward zero. FFT uses channel 1 + i * channel 2, a symmetric Hann window, and power-of-two zero padding. Analysis uses [startMs, endMs), with at least 4 samples. Peak frequency is an FFT-bin offset from the receiver frequency in Hz, not an absolute RF frequency or an interpolated estimate.
+
+NMRGraphs renders responsive SVG graphs at a fixed height. Defaults: FID 0..10 ms, FFT -10..10 kHz. The FID scale follows the analysis interval, so large early transients may be clipped. The analysis interval is highlighted. The colors option supports data1, data2 and fft.
+
+nmrlink/graphs also exports createRecordPlots, createFrequencyPlot, createPulsePlot, createT1Plot and createT2Plot. These return SVG strings and can run in Node.js without a DOM. Use the graph reference pages for the input point structures; do not invent them.
+
+nmrlink/browser provides saveMeasurement(record), readMeasurement(file), saveGraphPng(svg, { filename, scale }), and formatFileTimestamp(acquiredAt). Saved filenames use JST while acquiredAt remains UTC. Reading saved JSON permits reanalysis without contacting the apparatus.
+
+## Calibration and relaxation
+
+The root module exports frequency/pulse/T1/T2 sweep helpers, fitting functions and archive parsers. Consult the API reference and existing standard UI before implementing sweeps; reuse these helpers instead of duplicating serial commands or fit algorithms.
+
+- Frequency adjustment: Single measurements across a frequency range, compared within a specified spectral search band.
+- Pulse calibration: Single measurements across pulse1Cycles. Magnitude and common-phase signed signals are distinct. Do not independently phase-align each point if sign inversion is required.
+- T1: Double measurements, 180-degree pulse then tau then 90-degree pulse; fit A - B * exp(-tau / T1).
+- T2: Double measurements, 90-degree pulse then tau then 180-degree pulse. Echo analysis window follows the echo; fit against 2*tau using A * exp(-2*tau / T2).
+- Fit quality and acquisition-range warnings must remain visible. A fitted value is an estimate, not guaranteed calibration.
+
+## Remote connection: unverified in a real environment
+
+nmrlink-server provides Node.js serial transport and Firebase remote operation. It is not published on npm; obtain it from the repository. Do not suggest npm install nmrlink-server as a supported installation path.
+
+Remote operation uses Firebase Authentication and Firestore, without billing registration, VPN, Cloud Functions or Cloud Storage. Device-side policy and single-user ownership control operation. UI-level hiding does not guarantee confidentiality against direct Firestore access. The remote setup has not been tested in a real deployment; prefer direct connection for actual use. Never expose service-account keys, .env.local, or access-policy.json in a static site.
+
+## Documentation and examples
+
+- Documentation: https://masabando.github.io/nmrlink/
+- Installation: https://masabando.github.io/nmrlink/guide/install.html
+- Connection, including Linux: https://masabando.github.io/nmrlink/guide/connection.html
+- Public API contracts: https://masabando.github.io/nmrlink/docs/API.html
+- Analysis conventions: https://masabando.github.io/nmrlink/docs/ANALYSIS.html
+- Graph colors: https://masabando.github.io/nmrlink/guide/colors.html
+- Frequency graph: https://masabando.github.io/nmrlink/guide/frequencygraph.html
+- Pulse graph: https://masabando.github.io/nmrlink/guide/pulsegraph.html
+- T1 graph: https://masabando.github.io/nmrlink/guide/relaxationgraph.html
+- T2 graph: https://masabando.github.io/nmrlink/guide/echograph.html
+- Standard Web UI: https://masabando.github.io/nmrlink/examples/standard/
+- Minimal custom UI source: https://github.com/masabando/nmrlink/tree/main/examples/direct
+- Standard UI source: https://github.com/masabando/nmrlink/tree/main/examples/standard
+- Repository and license: https://github.com/masabando/nmrlink
+- Apparatus developer: https://researchmap.jp/kondo_yasushi
