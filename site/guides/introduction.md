@@ -30,6 +30,12 @@
 
 装置は教材販売会社を通じての販売が計画されています。
 
+## 対応ブラウザ
+
+実機への直接接続には、PC版の **Chrome・Edgeの最新版、またはFirefox 151以降** と、HTTPSまたは同じPCのlocalhostが必要です。**Safariでは実機へ直接接続できません。**
+
+Linuxではシリアルポートの権限とブラウザの導入方法による制限も確認してください。API対応と実機確認済みの環境、Snap版Firefoxの注意点は[OS・ブラウザの詳しい案内](./install.md)を参照してください。
+
 ## Web UIを使う
 
 - [標準Web UIを開く](../../examples/standard/index.html)：条件設定・測定・FID/FFT・再解析・保存をまとめた画面です。[使い方](./standard.md)

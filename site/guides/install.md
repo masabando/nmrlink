@@ -36,6 +36,28 @@ import { saveMeasurement } from "./packages/nmrlink/src/browser.js";
 
 Linuxで実機に接続する場合は、[接続と切断のLinux向け案内](./connection.md)でシリアルポートの権限を確認してください。
 
+## OSとブラウザの選び方
+
+実機への直接接続には、デスクトップ版のChromeまたはEdgeの最新版を基本の選択肢として使ってください。Firefoxも151以降でWeb Serialに対応しています。SafariはWeb Serialに対応していないため、Macでも実機への直接接続には使えません。
+
+| OS | 直接接続に使うブラウザ | 注意点 |
+| --- | --- | --- |
+| macOS | Chrome、Edge、Firefox 151以降 | Safariでは実機へ直接接続できません |
+| Windows | Chrome、Edge、Firefox 151以降 | 組織の管理ポリシーで機器へのアクセスが制限される場合があります |
+| Linux | Chrome、Edge、Firefox 151以降 | シリアルポートの権限とブラウザの導入方法を確認してください |
+
+これはブラウザのAPI対応に基づく案内であり、すべての組み合わせでNMRLinkの実機動作を確認した一覧ではありません。NMRLinkの標準Web UIはmacOSのChromeで実機確認しています。Debian 13のFirefoxでの成功報告は、ライブラリ化前のブラウザ制御プログラムに対するもので、NMRLinkの動作確認とは区別しています。
+
+Firefoxでは、初回のポート選択前にサイトの機器アクセスを許可するためのアドオン導入案内が表示される場合があります。組織管理下では管理者によるWeb Serialの許可も必要になる場合があります。古いFirefoxやESR版を使う場合は、対応バージョンか確認してください。
+
+Snap版Chromiumでは、Snapの `raw-usb` 権限の接続が必要になる場合があります。Linux側のポート権限とは別の設定です。確認方法とコマンドは[接続と切断のSnap版Chromium向け手順](./connection.md)を参照してください。
+
+LinuxのSnap版Firefoxには、Web Serialのポートが表示されない[既知の問題](https://bugzilla.mozilla.org/show_bug.cgi?id=2038075)があります。通常のユーザー権限に加えて、配布パッケージによる制限も確認してください。Firefoxを使う場合は、[Mozilla公式のLinux導入案内](https://support.mozilla.org/en-US/kb/install-firefox-linux)から非Snap版の導入方法も確認できます。[Linuxでの接続手順](./connection.md)も参照してください。
+
+スマホ・タブレットは、このドキュメントや模擬グラフの閲覧に使えます。NMRLinkの実機への直接接続は、装置をUSB接続したPCで行ってください。Safariでもドキュメントの閲覧や保存済みデータの表示・解析は可能です。直接接続の制限は、これらの閲覧・解析の制限ではありません。
+
+対応状況の詳細は[MDNのWeb Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API#browser_compatibility)と[MozillaのFirefox対応案内](https://hacks.mozilla.org/2026/05/web-serial-support-in-firefox/)を参照してください。
+
 ## バンドラーで使う
 
 プロジェクトで次を実行します。

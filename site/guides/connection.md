@@ -1,6 +1,6 @@
 # 接続と切断
 
-ポート選択と接続状態の管理をNMRControllerへ任せます。
+ポート選択と接続状態の管理をNMRControllerへ任せます。実機への直接接続に使うブラウザは、[導入ページのOS・ブラウザ案内](./install.md)を確認してください。Safariでは直接接続できません。
 
 <!-- example:connection -->
 
@@ -37,6 +37,29 @@ sudo usermod -aG dialout "$USER"
 追加後はデスクトップからログアウトし、再ログインしてブラウザを起動してください。端末やブラウザを開き直すだけでは、新しいグループが反映されない場合があります。ポートの所属グループや権限の設定方法はディストリビューションによって異なります。[Debianのグループに関する説明](https://wiki.debian.org/SystemGroups)も参照してください。
 
 Pythonの制御プログラム、シリアルモニター、別のブラウザやタブなど、同じポートを使っているアプリは先に切断します。
+
+### Snap版Chromiumで接続する場合
+
+Snap版Chromiumでは、Linux側のポート権限に加えて、Snap側の `raw-usb` インターフェースの接続が必要になる場合があります。`raw-usb` はユーザーを追加するグループではなく、SnapアプリにUSB機器へのアクセスを許可する仕組みです。USBシリアルの `/dev/ttyUSB*`・`/dev/ttyACM*` へのアクセスも関係します。
+
+まず、ChromiumがSnapで導入されているかと、権限の接続状態を確認します。
+
+```sh
+snap list chromium
+snap connections chromium
+```
+
+`raw-usb` の行があり、Slot欄が `-` なら未接続です。管理者が次を実行すると、ChromiumにUSB機器へのアクセスを許可できます。
+
+```sh
+sudo snap connect chromium:raw-usb
+```
+
+Chromiumを完全に終了して起動し直し、接続を試してください。この許可はNMR装置だけに限定されません。`dialout` などLinux側の読み書き権限も別途必要で、これだけで接続成功を保証するものではありません。`raw-usb` の行がない、またはplugがないというエラーになる場合は、そのパッケージに同じ手順は適用できません。
+
+Snap版Firefoxには、Web Serialのポートが表示されない[既知の問題](https://bugzilla.mozilla.org/show_bug.cgi?id=2038075)があり、確認した公式パッケージ定義には `raw-usb`・`serial-port` のplugがありません。上のコマンドの `chromium` を `firefox` に置き換える対処は使えません。[Mozilla公式の導入案内](https://support.mozilla.org/en-US/kb/install-firefox-linux)で非Snap版の導入方法を確認してください。
+
+参照：[Snapのraw-usb仕様](https://snapcraft.io/docs/reference/interfaces/raw-usb-interface/)、[snapdのUSBシリアルアクセス定義](https://github.com/canonical/snapd/blob/master/interfaces/builtin/raw_usb.go)、[Firefox Snapのパッケージ定義](https://github.com/canonical/firefox-snap/blob/stable/snapcraft.yaml)。
 
 ### 接続できないとき
 
