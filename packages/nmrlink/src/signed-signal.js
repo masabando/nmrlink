@@ -1,3 +1,4 @@
+import { createError } from "./errors.js";
 import { analyzeMeasurement } from "./analysis.js";
 
 /** Complex projection at one common frequency, with the selected window's time origin. */
@@ -19,33 +20,33 @@ export function complexAt(data, spectrum, intervalMs, hz) {
 export function analyzeSignedRecords(records, {
   analysis = {}, referenceIndex = null, phaseDegrees = 0, field = "pulse1Cycles", mode = "single",
 } = {}) {
-  if (!Array.isArray(records) || !records.length) throw new Error("先にパルス走査を行ってください。");
-  if (!Number.isFinite(phaseDegrees)) throw new Error("位相補正は有限数値で指定してください。");
+  if (!Array.isArray(records) || !records.length) throw createError(Error, "NO_RECORDS");
+  if (!Number.isFinite(phaseDegrees)) throw createError(Error, "INVALID_PHASE");
   const first = records[0];
   for (const record of records) {
     if (record.mode !== mode || record.source !== first.source || record.sampleIntervalMs !== first.sampleIntervalMs ||
       Object.keys(first.parameters).some(key => key !== field && record.parameters[key] !== first.parameters[key])) {
-      throw new Error("周波数・位相・積算などの共通測定条件とデータ種別を揃えてください。");
+      throw createError(Error, "INCONSISTENT_RECORDS");
     }
   }
   const minHz = analysis.minHz ?? -3000, maxHz = analysis.maxHz ?? 3000;
-  if (![minHz, maxHz].every(Number.isFinite) || minHz >= maxHz) throw new Error("ピーク探索帯域が不正です。");
+  if (![minHz, maxHz].every(Number.isFinite) || minHz >= maxHz) throw createError(Error, "INVALID_SEARCH_BAND");
   const prepared = records.map(record => ({ record, ...analyzeMeasurement(record, analysis) }));
   const grid = prepared[0].spectrum.bins.filter(bin => bin.hz >= minHz && bin.hz <= maxHz).map(bin => bin.hz);
-  if (!grid.length) throw new Error("探索帯域にFFTビンがありません。");
+  if (!grid.length) throw createError(Error, "NO_FFT_BINS");
   const counts = new Map();
   for (const record of records) counts.set(record.parameters[field], (counts.get(record.parameters[field]) ?? 0) + 1);
   const power = new Float64Array(grid.length);
   for (const item of prepared) {
     const bins = item.spectrum.bins.filter(bin => bin.hz >= minHz && bin.hz <= maxHz);
-    if (bins.length !== grid.length || bins.some((bin, index) => bin.hz !== grid[index])) throw new Error("FFTの周波数軸が一致しません。");
+    if (bins.length !== grid.length || bins.some((bin, index) => bin.hz !== grid[index])) throw createError(Error, "INCONSISTENT_FFT_GRID");
     bins.forEach((bin, index) => { power[index] += bin.amplitude ** 2 / counts.get(item.record.parameters[field]); });
   }
   const strongestBin = power.reduce((best, value, index) => value > power[best] ? index : best, 0);
   const hz = grid[strongestBin];
   const values = prepared.map(item => ({ ...complexAt(item.data, item.spectrum, item.record.sampleIntervalMs, hz), record: item.record }));
   const maximum = Math.max(...values.map(value => Math.hypot(value.real, value.imaginary)));
-  if (maximum < 1e-9) throw Object.assign(new Error("共通位相基準に使える信号がありません。"), { code: "NO_REFERENCE_SIGNAL" });
+  if (maximum < 1e-9) throw createError(Error, "NO_REFERENCE_SIGNAL");
   const strong = values.filter(value => Math.hypot(value.real, value.imaginary) >= maximum * 0.25);
   let c = 0, s = 0, total = 0;
   for (const value of strong) {
@@ -56,9 +57,9 @@ export function analyzeSignedRecords(records, {
   }
   let phaseRad = 0.5 * Math.atan2(s, c);
   if (referenceIndex !== null) {
-    if (!Number.isInteger(referenceIndex) || !values[referenceIndex]) throw new Error("位相基準の測定点が不正です。");
+    if (!Number.isInteger(referenceIndex) || !values[referenceIndex]) throw createError(Error, "INVALID_REFERENCE_INDEX");
     const ref = values[referenceIndex];
-    if (Math.hypot(ref.real, ref.imaginary) < 1e-9) throw new Error("選択点の信号がゼロです。");
+    if (Math.hypot(ref.real, ref.imaginary) < 1e-9) throw createError(Error, "ZERO_REFERENCE_SIGNAL");
     phaseRad = Math.atan2(ref.imaginary, ref.real);
   } else {
     const earliest = strong.reduce((best, value) => value.record.parameters[field] < best.record.parameters[field] ? value : best);

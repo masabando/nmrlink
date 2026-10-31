@@ -25,7 +25,7 @@ test("T1 reproduces the PoC fit and preserves raw signs and units", () => {
 test("T1 estimates incomplete recovery with a warning; rejects wrong conditions and incoherent fits", () => {
   const short = analyzeT1(records().slice(0,7),{analysis,fromMs:5,toMs:35});
   assert(Math.abs(short.fit.T - 20) < .1);
-  assert(short.warnings.some(warning => warning.includes("3倍未満")));
+  assert(short.warningDetails.some(warning => warning.code === "T1_INCOMPLETE_RECOVERY"));
   const mixed=records();mixed[1].parameters.scans++;assert.throws(()=>analyzeT1(mixed,{analysis}));
   const incoherent=records().map((r,i)=>record(r.parameters.pulseIntervalMs,i*Math.PI/4));
   const result=analyzeT1(incoherent,{analysis});assert.equal(result.fit,null);assert(result.reference.coherence<.85);

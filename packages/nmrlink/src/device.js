@@ -1,3 +1,4 @@
+import { createError, normalizeError } from "./errors.js";
 import { encodeCommand, encodeParameters, validateParameters, parseSampleLine,
   SAMPLE_COUNT, SAMPLE_INTERVAL_MS } from "./protocol.js";
 import { measurementDurationMs } from "./timing.js";
@@ -14,7 +15,7 @@ export class NMRDevice {
   constructor({ transport = new WebSerialTransport(), responseTimeoutMs = 5000,
     dataTimeoutMs = 30000, measurementMarginMs = 20000 } = {}) {
     for (const value of [responseTimeoutMs, dataTimeoutMs, measurementMarginMs]) {
-      if (!Number.isFinite(value) || value <= 0) throw new RangeError("Timeouts must be positive finite numbers.");
+      if (!Number.isFinite(value) || value <= 0) throw createError(RangeError, "INVALID_TIMEOUT");
     }
     this.transport = transport;
     this.responseTimeoutMs = responseTimeoutMs;
@@ -35,7 +36,7 @@ export class NMRDevice {
   set state(value) { this.currentState = value; }
 
   async connect() {
-    if (this.busy || this.state !== "disconnected") throw new Error("Device is already active.");
+    if (this.busy || this.state !== "disconnected") throw createError(Error, "DEVICE_ACTIVE");
     this.busy = true;
     this.state = "connecting";
     try {
@@ -43,7 +44,7 @@ export class NMRDevice {
       this.state = "connected";
     } catch (error) {
       this.state = "disconnected";
-      throw error;
+      throw normalizeError(error, "SERIAL_CONNECTION_FAILED");
     } finally {
       this.busy = false;
     }
@@ -51,9 +52,10 @@ export class NMRDevice {
 
   /** Disconnecting is not a firmware stop command. */
   async disconnect() {
-    if (this.busy) throw new Error("Wait for the current operation; disconnect does not stop a measurement.");
+    if (this.busy) throw createError(Error, "DISCONNECT_WHILE_BUSY");
     this.busy = true;
     try { await this.transport.disconnect(); }
+    catch (error) { throw normalizeError(error, "SERIAL_DISCONNECT_FAILED"); }
     finally { this.state = "disconnected"; this.busy = false; }
   }
 
@@ -65,9 +67,9 @@ export class NMRDevice {
   async measure(input, { mode = "single" } = {}) {
     // Invalid local input must not send commands or invalidate a good connection.
     const parameters = validateParameters(input);
-    if (!["single", "double"].includes(mode)) throw new RangeError("Mode must be single or double.");
-    if (this.busy) throw new Error("Another device operation is in progress.");
-    if (this.state !== "connected") throw new Error("Device is not connected.");
+    if (!["single", "double"].includes(mode)) throw createError(RangeError, "INVALID_MODE");
+    if (this.busy) throw createError(Error, "DEVICE_BUSY");
+    if (this.state !== "connected") throw createError(Error, "DEVICE_NOT_CONNECTED");
     this.busy = true;
     this.state = "measuring";
     try {
@@ -85,7 +87,7 @@ export class NMRDevice {
       const deadline = performance.now() + this.dataTimeoutMs;
       for (let index = 0; index < SAMPLE_COUNT; index++) {
         const remainingMs = deadline - performance.now();
-        if (remainingMs <= 0) throw new Error(`Sample transfer timed out at ${index}/${SAMPLE_COUNT}.`);
+        if (remainingMs <= 0) throw createError(Error, "SAMPLE_TRANSFER_TIMEOUT", { index, sampleCount: SAMPLE_COUNT });
         const line = await this.transport.readLine(Math.min(remainingMs, this.responseTimeoutMs));
         raw.push(parseSampleLine(line));
       }
@@ -104,8 +106,8 @@ export class NMRDevice {
       // the next operation. Require reconnection rather than retrying commands.
       this.state = "disconnected";
       try { await this.transport.disconnect(); }
-      catch (cleanupError) { throw new AggregateError([error, cleanupError], "Measurement and cleanup failed."); }
-      throw error;
+      catch (cleanupError) { throw createError(AggregateError, "MEASUREMENT_CLEANUP_FAILED", {}, { errors: [error, cleanupError] }); }
+      throw normalizeError(error);
     } finally {
       this.busy = false;
     }
@@ -116,7 +118,7 @@ export class NMRDevice {
     await this.transport.write(encodeCommand("parameters"));
     await delay(50);
     const acknowledgement = await this.response(this.responseTimeoutMs);
-    if (!acknowledgement.includes("CMD_P_OK")) throw new Error("Controller did not accept parameter setup.");
+    if (!acknowledgement.includes("CMD_P_OK")) throw createError(Error, "PARAMETER_SETUP_REJECTED");
     await this.transport.write(encodeParameters(parameters));
     await delay(50);
     await this.response(this.responseTimeoutMs);
@@ -125,7 +127,7 @@ export class NMRDevice {
   async response(timeoutMs) {
     const line = (await this.transport.readLine(timeoutMs)).trim();
     if (!line || /error|fail|reject/i.test(line)) {
-      throw new Error(`Invalid controller acknowledgement: ${line}`);
+      throw createError(Error, "INVALID_ACKNOWLEDGEMENT", { line });
     }
     return line;
   }

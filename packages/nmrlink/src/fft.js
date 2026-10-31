@@ -1,3 +1,4 @@
+import { createError } from "./errors.js";
 import { validateSamples } from "./sample-validation.js";
 
 // Bound allocations and bitwise-index operations; normal acquisitions use 2048 points.
@@ -49,17 +50,17 @@ export function computeSpectrum(data, {
   if (![sampleIntervalMs, startMs, endMs].every(Number.isFinite) ||
       sampleIntervalMs <= 0 || startMs < 0 || startMs >= endMs ||
       endMs > data.length * sampleIntervalMs + 1e-9) {
-    throw new RangeError("FFT range must satisfy 0 <= startMs < endMs <= acquisition duration, with a positive sampleIntervalMs.");
+    throw createError(RangeError, "INVALID_FFT_RANGE");
   }
-  if (!["hann", "rect"].includes(window)) throw new RangeError("Window must be hann or rect.");
+  if (!["hann", "rect"].includes(window)) throw createError(RangeError, "INVALID_WINDOW");
 
   // Match the PoC's rounding tolerance at exact sample boundaries.
   const first = Math.ceil(startMs / sampleIntervalMs - 1e-9);
   const last = Math.min(data.length, Math.ceil(endMs / sampleIntervalMs - 1e-9));
   const count = last - first;
-  if (count < 4) throw new RangeError("FFT requires at least four selected samples.");
+  if (count < 4) throw createError(RangeError, "INSUFFICIENT_FFT_SAMPLES");
   const size = 2 ** Math.ceil(Math.log2(count));
-  if (size > MAX_FFT_SIZE) throw new RangeError(`FFT size exceeds ${MAX_FFT_SIZE} points.`);
+  if (size > MAX_FFT_SIZE) throw createError(RangeError, "FFT_TOO_LARGE", { maximum: MAX_FFT_SIZE });
 
   const real = new Float64Array(size);
   const imaginary = new Float64Array(size);
@@ -78,7 +79,7 @@ export function computeSpectrum(data, {
     const imaginaryValue = imaginary[transformedIndex];
     // Divide after hypot, just as the PoC does, for amplitude compatibility.
     const amplitude = Math.hypot(realValue, imaginaryValue) / weight;
-    if (!Number.isFinite(amplitude)) throw new RangeError("FFT calculation overflowed.");
+    if (!Number.isFinite(amplitude)) throw createError(RangeError, "FFT_OVERFLOW");
     return {
       hz: (index - size / 2) * 1000 / (size * sampleIntervalMs),
       real: realValue / weight,

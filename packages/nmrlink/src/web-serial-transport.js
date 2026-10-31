@@ -1,3 +1,4 @@
+import { createError, normalizeError } from "./errors.js";
 import { LineDecoder } from "./line-decoder.js";
 import { SERIAL_OPTIONS } from "./protocol.js";
 
@@ -19,9 +20,9 @@ export class WebSerialTransport {
   /** Call directly from a user gesture so the browser can display its chooser. */
   async connect() {
     if (this.state !== "disconnected" || this.closeTask) {
-      throw new Error("Serial connection is already active or changing.");
+      throw createError(Error, "SERIAL_ACTIVE");
     }
-    if (!this.serial) throw new Error("Web Serial is unavailable. Use a supported browser and HTTPS or localhost.");
+    if (!this.serial) throw createError(Error, "WEB_SERIAL_UNAVAILABLE");
     this.state = "connecting";
     this.lines = [];
     this.error = null;
@@ -35,11 +36,11 @@ export class WebSerialTransport {
       await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
       await new Promise(resolve => setTimeout(resolve, 1000));
       if (this.error) throw this.error;
-      if (this.state !== "connecting") throw new Error("Connection was interrupted.");
+      if (this.state !== "connecting") throw createError(Error, "SERIAL_CONNECTION_INTERRUPTED");
       this.state = "connected";
     } catch (error) {
       await this.disconnect();
-      throw error;
+      throw normalizeError(error, "SERIAL_CONNECTION_FAILED");
     }
   }
 
@@ -49,7 +50,7 @@ export class WebSerialTransport {
         const { value, done } = await this.reader.read();
         if (done) {
           this.decoder.finish();
-          throw new Error("Serial input ended. Reconnect the device.");
+          throw createError(Error, "SERIAL_INPUT_ENDED");
         }
         for (const line of this.decoder.push(value)) {
           if (this.waiter) {
@@ -59,7 +60,7 @@ export class WebSerialTransport {
             waiter.resolve(line);
           } else {
             this.lines.push(line);
-            if (this.lines.length > 4096) throw new Error("Serial response buffer overflow.");
+            if (this.lines.length > 4096) throw createError(Error, "SERIAL_BUFFER_OVERFLOW");
           }
         }
       }
@@ -75,7 +76,7 @@ export class WebSerialTransport {
   }
 
   fail(error) {
-    this.error ??= error;
+    this.error ??= normalizeError(error, "SERIAL_READ_FAILED");
     if (this.waiter) {
       clearTimeout(this.waiter.timer);
       this.waiter.reject(this.error);
@@ -84,20 +85,21 @@ export class WebSerialTransport {
   }
 
   async write(bytes) {
-    if (this.state !== "connected" || this.error) throw this.error ?? new Error("Device is not connected.");
-    await this.writer.write(bytes);
+    if (this.state !== "connected" || this.error) throw this.error ?? createError(Error, "DEVICE_NOT_CONNECTED");
+    try { await this.writer.write(bytes); }
+    catch (error) { throw normalizeError(error, "SERIAL_WRITE_FAILED"); }
   }
 
   readLine(timeoutMs) {
-    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return Promise.reject(new RangeError("Invalid response timeout."));
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) return Promise.reject(createError(RangeError, "INVALID_RESPONSE_TIMEOUT"));
     if (this.error) return Promise.reject(this.error);
-    if (this.state !== "connected") return Promise.reject(new Error("Device is not connected."));
-    if (this.waiter) return Promise.reject(new Error("Only one response reader is allowed."));
+    if (this.state !== "connected") return Promise.reject(createError(Error, "DEVICE_NOT_CONNECTED"));
+    if (this.waiter) return Promise.reject(createError(Error, "SERIAL_READER_BUSY"));
     if (this.lines.length) return Promise.resolve(this.lines.shift());
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.waiter = null;
-        const error = new Error("Controller response timed out. Reconnect the device.");
+        const error = createError(Error, "RESPONSE_TIMEOUT");
         this.fail(error);
         reject(error);
       }, timeoutMs);
@@ -107,7 +109,7 @@ export class WebSerialTransport {
 
   /** Discard buffered input only before a new command sequence. */
   clearInput() {
-    if (this.waiter) throw new Error("Cannot clear input while awaiting a response.");
+    if (this.waiter) throw createError(Error, "SERIAL_CLEAR_WHILE_READING");
     if (this.error) throw this.error;
     this.lines = [];
     this.decoder.reset();
@@ -117,8 +119,8 @@ export class WebSerialTransport {
     if (this.closeTask) return this.closeTask;
     if (this.state === "disconnected") return Promise.resolve();
     this.state = "disconnecting";
-    this.fail(new Error("Serial connection closed."));
-    this.closeTask = this.close().finally(() => { this.closeTask = null; });
+    this.fail(createError(Error, "SERIAL_CLOSED"));
+    this.closeTask = this.close().catch(error => { throw normalizeError(error, "SERIAL_DISCONNECT_FAILED"); }).finally(() => { this.closeTask = null; });
     return this.closeTask;
   }
 
@@ -139,6 +141,6 @@ export class WebSerialTransport {
       this.lines = [];
       this.state = "disconnected";
     }
-    if (errors.length) throw new AggregateError(errors, "Serial cleanup failed.");
+    if (errors.length) throw createError(AggregateError, "SERIAL_CLEANUP_FAILED", {}, { errors: errors });
   }
 }

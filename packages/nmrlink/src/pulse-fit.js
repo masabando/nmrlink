@@ -1,18 +1,19 @@
+import { createError } from "./errors.js";
 // The original PoC fit is retained as the first choice for well-resolved signed data.
 function signedPulseCandidates(points) {
   const p = [...points].sort((a2, b2) => a2.length - b2.length);
-  if (p.length < 5 || new Set(p.map((q) => q.length)).size !== p.length || !p.every((q) => Number.isFinite(q.amplitude) && Number.isFinite(q.length) && q.length > 0)) throw new Error("符号付きの有効な5点以上が必要です。");
+  if (p.length < 5 || new Set(p.map((q) => q.length)).size !== p.length || !p.every((q) => Number.isFinite(q.amplitude) && Number.isFinite(q.length) && q.length > 0)) throw createError(Error, "INVALID_SIGNED_PULSE_POINTS");
   const scale = Math.max(...p.map((q) => Math.abs(q.amplitude)));
-  if (scale < 1e-9) throw new Error("信号がゼロです。");
+  if (scale < 1e-9) throw createError(Error, "ZERO_SIGNAL");
   const peak = p.findIndex((q, i) => i > 0 && i < p.length - 1 && q.amplitude >= p[i - 1].amplitude && q.amplitude > p[i + 1].amplitude && q.amplitude > 0.35 * scale);
-  if (peak < 0) throw new Error("最初の正の山が見つかりません。基準位相・走査範囲を確認してください。");
-  if (p[0].length >= p[peak].length * 0.65) throw new Error("短いパルスの点が不足しています。");
+  if (peak < 0) throw createError(Error, "PULSE_PEAK_NOT_FOUND");
+  if (p[0].length >= p[peak].length * 0.65) throw createError(Error, "INSUFFICIENT_SHORT_PULSES");
   let crossing = -1;
   for (let i = peak; i < p.length - 1; i++) if (p[i].amplitude >= 0 && p[i + 1].amplitude < 0) {
     crossing = i;
     break;
   }
-  if (crossing < 0) throw new Error("正から負へのゼロ交差が未測定です。180\xB0の先まで測定してください。");
+  if (crossing < 0) throw createError(Error, "PULSE_ZERO_CROSSING_NOT_FOUND");
   const a = p[crossing], b = p[crossing + 1], p180 = a.length + (b.length - a.length) * a.amplitude / (a.amplitude - b.amplitude);
   return { p90: p[peak].length, p180, peakIndex: peak, crossingIndex: crossing, points: p, zeroBracket: [a.length, b.length] };
 }
@@ -34,7 +35,7 @@ function strictPulseFit(points) {
       index = i;
     }
   }
-  if (index === 0 || index === steps) throw new Error("近似の最適点が探索範囲の端です。");
+  if (index === 0 || index === steps) throw createError(Error, "PULSE_FIT_BOUNDARY");
   let l = lower + (upper - lower) * (index - 1) / steps, h = lower + (upper - lower) * (index + 1) / steps;
   for (let i = 0; i < 45; i++) {
     const a2 = l + (h - l) / 3, b2 = h - (h - l) / 3;
@@ -43,10 +44,10 @@ function strictPulseFit(points) {
   }
   best = evaluate((l + h) / 2);
   const mean = p.reduce((s, q) => s + q.amplitude, 0) / p.length, sst = p.reduce((s, q) => s + (q.amplitude - mean) ** 2, 0), r2 = 1 - best.sse / sst, p180 = 2 * best.p90;
-  if (!Number.isFinite(r2) || r2 < 0.85) throw new Error("符号付きモデルとの一致が不十分です（R\xB2 < 0.85）。");
-  if (Math.abs(best.B) > 0.2 * best.A) throw new Error("背景成分が大きすぎます。基準位相や解析範囲を確認してください。");
+  if (!Number.isFinite(r2) || r2 < 0.85) throw createError(Error, "PULSE_FIT_LOW_R2");
+  if (Math.abs(best.B) > 0.2 * best.A) throw createError(Error, "PULSE_BACKGROUND_TOO_LARGE");
   const [a, b] = measured.zeroBracket, margin = Math.max(b - a, 1);
-  if (p180 < p[0].length || p180 > p.at(-1).length || p180 < a - margin || p180 > b + margin) throw new Error("推定180\xB0が範囲外またはゼロ交差と不一致です。");
+  if (p180 < p[0].length || p180 > p.at(-1).length || p180 < a - margin || p180 > b + margin) throw createError(Error, "PULSE_CANDIDATE_MISMATCH");
   return { p90: best.p90, p180, A: best.A, B: best.B, r2, rmse: Math.sqrt(best.sse / p.length), from: p[0].length, to: p.at(-1).length, n: p.length, measured: { p90: measured.p90, p180: measured.p180 }, model: "A*sin(pi*length/(2*p90))+B" };
 }
 /** Least-squares sine estimate even when a peak or zero crossing was not measured. */
@@ -56,10 +57,10 @@ function fitPulseCalibration(points, { magnitude = false } = {}) {
   }
   const p = [...points].sort((a, b) => a.length - b.length);
   if (p.length < 3 || !p.every(q => Number.isFinite(q.length) && q.length > 0 && Number.isFinite(q.amplitude)) || new Set(p.map(q => q.length)).size !== p.length) {
-    throw new Error("サイン近似には異なる周期数の有限な3点以上が必要です。");
+    throw createError(Error, "INSUFFICIENT_PULSE_FIT_POINTS");
   }
   const scale = Math.max(...p.map(q => Math.abs(q.amplitude)));
-  if (scale < 1e-9) throw new Error("信号がゼロのためサイン近似を求められません。");
+  if (scale < 1e-9) throw createError(Error, "ZERO_PULSE_FIT_SIGNAL");
   const y = p.map(q => q.amplitude / scale), n = p.length, sy = y.reduce((s,v) => s+v,0);
   const mean = sy / n, sst = y.reduce((s,v) => s+(v-mean)**2,0);
   function solve(logLength) {
@@ -76,7 +77,7 @@ function fitPulseCalibration(points, { magnitude = false } = {}) {
   const lo = Math.log(step/2), hi = Math.log(p.at(-1).length*10), steps = 4000;
   let best = {sse:Infinity}, index = 0;
   for (let i=0;i<=steps;i++) { const value=solve(lo+(hi-lo)*i/steps); if(value.sse<best.sse){best=value;index=i;} }
-  if (!Number.isFinite(best.sse)) throw new Error("サイン近似を計算できませんでした。");
+  if (!Number.isFinite(best.sse)) throw createError(Error, "PULSE_FIT_FAILED");
   let l=lo+(hi-lo)*Math.max(0,index-1)/steps, h=lo+(hi-lo)*Math.min(steps,index+1)/steps;
   for(let i=0;i<45;i++){const a=l+(h-l)/3,b=h-(h-l)/3;if(solve(a).sse<solve(b).sse)h=b;else l=a;}
   best=solve((l+h)/2);

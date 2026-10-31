@@ -13,3 +13,7 @@ dist/
 outputs/
 
 .DS_Store
+
+# Local AI skills
+.agents/
+skills-lock.json

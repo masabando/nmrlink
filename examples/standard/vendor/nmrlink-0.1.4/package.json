@@ -1,0 +1,43 @@
+{
+  "name": "nmrlink",
+  "version": "0.1.4",
+  "description": "JavaScript library for educational NMR hardware control via Web Serial, signal analysis, and SVG graphs.",
+  "type": "module",
+  "keywords": [
+    "NMR",
+    "web-serial",
+    "instrument-control",
+    "signal-processing",
+    "FFT",
+    "quantum-computing",
+    "quantum-education"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./graphs": "./src/graphs.js",
+    "./browser": "./src/browser.js"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Masamitsu Bando",
+    "url": "https://alice.helixcode.net/~bando/"
+  },
+  "homepage": "https://masabando.github.io/nmrlink/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masabando/nmrlink.git",
+    "directory": "packages/nmrlink"
+  },
+  "bugs": {
+    "url": "https://github.com/masabando/nmrlink/issues"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./src/index.js"
+}

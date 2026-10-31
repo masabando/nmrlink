@@ -1,3 +1,4 @@
+import { createWarning, warningFromError } from "./errors.js";
 import { integerSteps, runSingleSweep } from "./sweep.js";
 import { evaluateFrequency } from "./frequency-sweep.js";
 import { analyzeSignedRecords } from "./signed-signal.js";
@@ -26,15 +27,15 @@ export function analyzePulseCalibration(records, options = {}) {
   const { points, reference } = result;
   const coherence = reference.coherence;
   let measured = null, fit = null;
-  const warnings = [];
-  if (coherence < 0.85) warnings.push("測定点間の位相が共通方向に揃っていません。");
-  try { measured = signedPulseCandidates(points); } catch (error) { warnings.push(error.message); }
-  try { fit = fitPulseCalibration(points); } catch (error) { warnings.push(error.message); }
+  const warningDetails = [];
+  if (coherence < 0.85) warningDetails.push(createWarning("PHASE_INCOHERENT"));
+  try { measured = signedPulseCandidates(points); } catch (error) { warningDetails.push(warningFromError(error)); }
+  try { fit = fitPulseCalibration(points); } catch (error) { warningDetails.push(warningFromError(error)); }
   let magnitudeFit = null;
   try { magnitudeFit = fitPulseCalibration(points.map(point => ({length:point.length,amplitude:point.magnitude})), {magnitude:true}); }
-  catch (error) { warnings.push(error.message); }
-  if (fit && (fit.p180 > Math.max(...points.map(point => point.length)) || fit.p90 < Math.min(...points.map(point => point.length)))) warnings.push("近似のパルス長が測定範囲外です。外挿した推定値です。");
-  if (fit && fit.r2 < 0.85) warnings.push("サイン近似との一致度が低いため、推定値は参考値です。");
-  if (magnitudeFit && magnitudeFit.r2 < 0.85) warnings.push("絶対値のサイン近似との一致度が低いため、推定値は参考値です。");
-  return { ...result, measured, fit, magnitudeFit, warnings };
+  catch (error) { warningDetails.push(warningFromError(error)); }
+  if (fit && (fit.p180 > Math.max(...points.map(point => point.length)) || fit.p90 < Math.min(...points.map(point => point.length)))) warningDetails.push(createWarning("PULSE_FIT_EXTRAPOLATED"));
+  if (fit && fit.r2 < 0.85) warningDetails.push(createWarning("PULSE_FIT_LOW_AGREEMENT"));
+  if (magnitudeFit && magnitudeFit.r2 < 0.85) warningDetails.push(createWarning("MAGNITUDE_FIT_LOW_AGREEMENT"));
+  return { ...result, measured, fit, magnitudeFit, warnings: warningDetails.map(warning => warning.message), warningDetails };
 }

@@ -1,3 +1,4 @@
+import { createError, normalizeError } from "./errors.js";
 import { NMRDevice } from "./device.js";
 import { runFrequencySweep } from "./frequency-sweep.js";
 import { runT2Sweep } from "./t2-sweep.js";
@@ -30,7 +31,7 @@ export class NMRController {
   }
 
   subscribe(type, callback) {
-    if (this.disposed) throw new Error("Controller is disposed.");
+    if (this.disposed) throw createError(Error, "CONTROLLER_DISPOSED");
     this.listeners[type].add(callback);
     return () => this.listeners[type].delete(callback);
   }
@@ -48,7 +49,7 @@ export class NMRController {
       try { listener(value); }
       catch (error) {
         // A UI/analysis error must not invalidate a successful hardware operation.
-        if (type !== "error") this.emit("error", error);
+        if (type !== "error") this.emit("error", normalizeError(error));
         else console.error(error);
       }
     }
@@ -65,8 +66,8 @@ export class NMRController {
 
   async run(operation, action) {
     if (this.disposed || this.operation) {
-      const error = new Error("Controller is disposed or another operation is running.");
-      this.emit("error", error);
+      const error = createError(Error, "CONTROLLER_BUSY");
+      this.emit("error", normalizeError(error));
       return { ok: false, error };
     }
     this.operation = operation;
@@ -79,7 +80,8 @@ export class NMRController {
         this.emit("result", value);
       }
       return { ok: true, value };
-    } catch (error) {
+    } catch (cause) {
+      const error = normalizeError(cause);
       this.emit("error", error);
       return { ok: false, error };
     } finally {
@@ -111,7 +113,7 @@ export class NMRController {
 
   /** Stop UI monitoring only; never stop or disconnect the hardware implicitly. */
   dispose() {
-    if (this.operation) throw new Error("Wait for the current operation before disposing.");
+    if (this.operation) throw createError(Error, "CONTROLLER_DISPOSE_BUSY");
     clearInterval(this.timer);
     this.disposed = true;
     for (const listeners of Object.values(this.listeners)) listeners.clear();

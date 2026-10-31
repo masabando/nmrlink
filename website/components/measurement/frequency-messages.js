@@ -1,0 +1,123 @@
+export const frequencyMessages = {
+  ja: {
+    frequencyIdle: "同じ条件で測定し、探索帯域内のFFTピーク振幅を比較します。",
+    frequencyTitle: "周波数調整",
+    sweep: "周波数走査",
+    startHz: "開始周波数 [Hz]",
+    endHz: "終了周波数 [Hz]",
+    stepHz: "刻み幅 [Hz]",
+    commonAnalysis: "全点共通の解析条件",
+    minKHz: "ピーク探索下限 [kHz]",
+    maxKHz: "ピーク探索上限 [kHz]",
+    perPoint: "1点あたり約{seconds}秒",
+    plan: "{count}点 · 最終点 {last} Hz · 各点 {scans}回積算",
+    startScan: "走査開始",
+    stop: "現在の測定後に停止",
+    stopping: "停止を要求しました。現在の測定完了を待っています。",
+    scanHint:
+      "各周波数でSingle測定します。停止は現在の測定完了を待ちます。新しい走査では前回の記録を置き換えます。",
+    demoScan: "周波数走査デモ",
+    openScan: "全データJSONを開く",
+    openScanHint:
+      "再測定せずに周波数応答と各点のFID・FFTを確認できます。読み込み成功時に現在の記録と走査条件を置き換えます。",
+    response: "周波数応答",
+    responseEmpty: "走査すると結果を表示します。",
+    best: "最大振幅の候補：",
+    bestHint: "測定した範囲・刻み幅・解析条件での候補です。",
+    zero: "振幅ゼロのため判定できません。",
+    edge: "範囲の端です。範囲を広げて確認してください。",
+    adopt: "最大振幅の周波数を候補欄へ",
+    chosen: "選んだ周波数 [Hz]",
+    candidateHint:
+      "候補欄への反映では装置へ送信しません。標準測定へ切り替え、この値を測定条件へ入力してください。接続はそのまま使えます。",
+    measuredPoints: "測定点",
+    pointHint: "周波数のボタンを押すと、その点のFID・FFTを確認できます。",
+    setHz: "設定 [Hz]",
+    amplitude: "ピーク振幅 [a.u.]",
+    peakHz: "ピーク位置 [Hz]",
+    selected: "{frequency} Hz のFID・FFT",
+    selectedEmpty: "選択点のFID・FFT",
+    bandHint:
+      "FFT図は±10 kHzを表示します。走査の評価には入力したピーク探索帯域を使います。",
+    selectedJson: "選択点の生データJSON",
+    saveScan: "走査データを保存",
+    allJson: "全データJSON",
+    scanCsv: "走査CSV",
+    archiveHint:
+      "全データJSONには各点の生データと走査・解析条件を保存します。選択点のJSONは標準測定でも開けます。ページを閉じる前に保存してください。",
+    started: "走査を開始しました。第1点の測定完了を待っています。",
+    progress: "{completed} / {total}点完了 · {frequency} Hz",
+    complete: "走査が完了しました：{count}点。必要なデータを保存してください。",
+    stopped: "走査を停止しました：{count}点。取得済みの記録は保持しています。",
+    scanFailed:
+      "走査を中断しました。取得済みの記録は保持しています。自動再送は行いません。",
+    scanLoaded:
+      "保存データを読み込みました：{count}点。装置への命令は送っていません。",
+    demoScanSource: "模擬走査 · DEMO",
+    scanSource: "実機走査",
+    archiveTooLarge: "32 MiB以下の走査JSONを指定してください。",
+  },
+  en: {
+    frequencyIdle:
+      "Compare FFT peak amplitudes within the search band using identical measurement settings.",
+    frequencyTitle: "Frequency tuning",
+    sweep: "Frequency scan",
+    startHz: "Start frequency [Hz]",
+    endHz: "End frequency [Hz]",
+    stepHz: "Step [Hz]",
+    commonAnalysis: "Analysis settings for all points",
+    minKHz: "Peak search minimum [kHz]",
+    maxKHz: "Peak search maximum [kHz]",
+    perPoint: "About {seconds} s per point",
+    plan: "{count} points · Last {last} Hz · {scans} scans per point",
+    startScan: "Start scan",
+    stop: "Stop after current measurement",
+    stopping: "Stop requested. Waiting for the current measurement to finish.",
+    scanHint:
+      "Single measurements at each frequency. Stop waits for the current measurement. A new scan replaces the previous records.",
+    demoScan: "Frequency scan demo",
+    openScan: "Open full scan JSON",
+    openScanHint:
+      "Inspect the response and each point's FID/FFT without measuring again. A successful import replaces the current records and scan settings.",
+    response: "Frequency response",
+    responseEmpty: "Run a scan to display the response.",
+    best: "Maximum-amplitude candidate: ",
+    bestHint:
+      "A candidate within the measured range, step size, and analysis settings.",
+    zero: "Cannot select a candidate with zero amplitude.",
+    edge: "At the edge of the range. Widen the range to check.",
+    adopt: "Copy maximum-amplitude frequency to candidate",
+    chosen: "Selected frequency [Hz]",
+    candidateHint:
+      "Selecting a candidate sends no command. Switch to Measurement and enter this value in the settings. The connection remains available.",
+    measuredPoints: "Measured points",
+    pointHint: "Select a frequency to inspect that point's FID and FFT.",
+    setHz: "Set [Hz]",
+    amplitude: "Peak amplitude [a.u.]",
+    peakHz: "Peak offset [Hz]",
+    selected: "FID and FFT at {frequency} Hz",
+    selectedEmpty: "Selected point's FID and FFT",
+    bandHint:
+      "The FFT graph displays ±10 kHz. Scan evaluation uses the peak search band entered in the form.",
+    selectedJson: "Selected point raw JSON",
+    saveScan: "Save scan data",
+    allJson: "Full scan JSON",
+    scanCsv: "Scan CSV",
+    archiveHint:
+      "Full scan JSON contains raw data for every point and scan/analysis settings. A selected point's JSON can also be opened in Measurement. Save before closing the page.",
+    started: "Scan started. Waiting for the first measurement.",
+    progress: "{completed} / {total} points complete · {frequency} Hz",
+    complete: "Scan complete: {count} points. Save any data you need.",
+    stopped: "Scan stopped: {count} points. Acquired records are preserved.",
+    scanFailed:
+      "Scan interrupted. Acquired records are preserved. No automatic retry is performed.",
+    scanLoaded:
+      "Loaded scan data: {count} points. No commands were sent to the apparatus.",
+    demoScanSource: "Simulated scan · DEMO",
+    scanSource: "Hardware scan",
+    archiveTooLarge: "Choose a scan JSON file no larger than 32 MiB.",
+  },
+};
+export function interpolate(text, values) {
+  return text.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ""));
+}

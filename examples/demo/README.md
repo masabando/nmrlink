@@ -68,4 +68,4 @@ npm run test:firebase
 
 test:demoは実機もエミュレーターも使わず、合成波形と実際のプロトコル処理を検証します。Firebaseルールと利用交代はtest:firebaseで検証できます。デモ画面の変更後はデモを再起動し、ブラウザを再読み込みしてください。
 
-ベースライン補正・複素FFTもデモ画面で確認できます。[解析の仕様](../../docs/ANALYSIS.md)を参照してください。
+ベースライン補正・複素FFTもデモ画面で確認できます。[解析の仕様](https://masabando.github.io/nmrlink/reference/analysis/)を参照してください。

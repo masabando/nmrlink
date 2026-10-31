@@ -1,6 +1,6 @@
 # Firebase遠隔接続サンプル
 
-初回設定は [Firebase導入手順](../../docs/FIREBASE.md) を参照してください。
+初回設定は [Firebase導入手順](https://masabando.github.io/nmrlink/guide/remote-admin/) を参照してください。
 
 1. config.example.jsをconfig.jsにコピーし、公開Firebase設定と装置IDを入力します。
 2. nmrlink/ルートでnpm run export:remoteを実行します。
@@ -12,4 +12,4 @@ Web UIは静的HTML/JSだけです。秘密鍵や装置側の設定を公開フ�
 
 課金登録なしのSparkを前提に、AuthenticationとFirestoreだけを使います。Functions・Storageは不要です。遠隔接続は実環境で未検証です。現時点での利用はお控えください。
 
-自作UIのRemoteClient契約は [APIリファレンス](../../docs/API.md) を参照してください。
+自作UIのRemoteClient契約は [APIリファレンス](https://masabando.github.io/nmrlink/reference/api/) を参照してください。

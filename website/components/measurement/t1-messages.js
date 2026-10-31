@@ -1,0 +1,178 @@
+export const t1Messages = {
+  ja: {
+    t1Idle:
+      "待ち時間τを変えてDouble測定し、符号付き信号の反転回復からT1を推定します。",
+    sweep: "T1走査",
+    startMs: "τ 開始 [ms]",
+    endMs: "τ 終了 [ms]",
+    stepMs: "τ 刻み幅 [ms]",
+    fixedFrequency: "固定周波数 [Hz]",
+    p90: "90°パルス [周期数]",
+    p180: "180°パルス [周期数]",
+    commonAnalysis: "全点共通の解析条件",
+    minKHz: "ピーク探索下限 [kHz]",
+    maxKHz: "ピーク探索上限 [kHz]",
+    perPoint: "1点あたり約{min}〜{max}秒",
+    plan: "{count}点 · 最終点 {last} ms · 各点 {scans}回積算",
+    startScan: "走査開始",
+    stop: "現在の測定後に停止",
+    stopping: "停止を要求しました。現在の測定完了を待っています。",
+    scanHint:
+      "180°（位相0°）→ τ → 90°（位相0°）→ FID取得。停止は現在の測定完了を待ちます。新しい走査では前回の記録を置き換えます。",
+    demoScan: "T1走査デモ",
+    openScan: "全データJSONを開く",
+    openScanHint:
+      "再測定せずに回復曲線・近似・各点のFIDとFFTを確認できます。読み込み成功時に現在の記録と走査条件を置き換えます。",
+    curve: "T1・反転回復曲線",
+    responseEmpty: "走査すると結果を表示します。",
+    view: "表示する信号",
+    magnitude: "絶対値",
+    signed: "符号付き信号",
+    quadrature: "直交成分",
+    viewHint:
+      "近似は符号付き信号で行います。絶対値・直交成分は確認用の表示です。",
+    signedLegend: "● 符号付き信号　— 指数関数近似",
+    magnitudeLegend: "● 信号の絶対値（共通周波数）",
+    quadratureLegend: "● 直交成分",
+    fitValue: "T1：{T} ms · R² {r2}",
+    noFit: "T1：未確定",
+    fitDetails:
+      "A {A} · B {B} · B/A {ratio} · RMSE {rmse} · {count}点 · τ {from}〜{to} ms",
+    fitFrom: "近似開始 τ [ms]",
+    fitTo: "近似終了 τ [ms]",
+    updateFit: "近似を更新",
+    fitRangeError:
+      "近似範囲は1 ms以上で、開始より終了を大きく指定してください。",
+    fitApplied: "近似範囲を更新しました。再測定は行っていません。",
+    reference: "共通位相基準",
+    auto: "自動基準",
+    manual: "選択点の基準",
+    referenceSummary:
+      "{kind} · {hz} Hz · 共通方向の一致度 {coherence} · 追加補正 {phase}°",
+    autoReference: "自動基準に戻す",
+    selectedReference: "選択点を位相基準にする",
+    phase: "追加位相補正 [°]",
+    reanalyzeAll: "全点を再解析",
+    referenceHint:
+      "全点で共通の周波数・位相を使い、負の信号を残します。自動基準は回復の増加方向を正に揃えます。手動基準には十分回復した正のFIDを選んでください。",
+    noReferenceSignal: "共通周波数の位相基準に使える信号がありません。",
+    noReference: "取得点から共通位相基準を解析します。",
+    invalidPhase: "位相補正には有限の数値を入力してください。",
+    phaseApplied: "共通位相基準と近似範囲で全点を再解析しました。",
+    measuredPoints: "測定点",
+    pointHint: "τのボタンを押すと、その点のFID・FFTを確認できます。",
+    tau: "τ [ms]",
+    signal: "符号付き信号",
+    selected: "τ {tau} ms のFID・FFT",
+    selectedEmpty: "選択点のFID・FFT",
+    bandHint:
+      "FFT図は±10 kHzを表示します。走査の評価には入力したピーク探索帯域を使います。",
+    selectedJson: "選択点の生データJSON",
+    saveScan: "走査データを保存",
+    allJson: "全データJSON",
+    scanCsv: "T1 CSV",
+    archiveHint:
+      "全データJSONには各点の生データ・走査条件・位相基準・近似範囲を保存します。選択点のJSONは標準測定でも開けます。ページを閉じる前に保存してください。",
+    started: "走査を開始しました。第1点の測定完了を待っています。",
+    progress: "{completed} / {total}点完了 · τ {tau} ms",
+    complete: "走査が完了しました：{count}点。必要なデータを保存してください。",
+    stopped: "走査を停止しました：{count}点。取得済みの記録は保持しています。",
+    scanFailed:
+      "走査を中断しました。取得済みの記録は保持しています。自動再送は行いません。",
+    scanLoaded:
+      "保存データを読み込みました：{count}点。装置への命令は送っていません。",
+    demoScanSource: "模擬走査 · DEMO",
+    scanSource: "実機走査",
+  },
+  en: {
+    t1Idle:
+      "Vary delay τ in Double measurements and estimate T1 from signed inversion recovery.",
+    sweep: "T1 scan",
+    startMs: "τ start [ms]",
+    endMs: "τ end [ms]",
+    stepMs: "τ step [ms]",
+    fixedFrequency: "Fixed frequency [Hz]",
+    p90: "90° pulse [RF cycles]",
+    p180: "180° pulse [RF cycles]",
+    commonAnalysis: "Analysis settings for all points",
+    minKHz: "Peak search minimum [kHz]",
+    maxKHz: "Peak search maximum [kHz]",
+    perPoint: "About {min}–{max} s per point",
+    plan: "{count} points · Last {last} ms · {scans} scans per point",
+    startScan: "Start scan",
+    stop: "Stop after current measurement",
+    stopping: "Stop requested. Waiting for the current measurement to finish.",
+    scanHint:
+      "180° (phase 0°) → τ → 90° (phase 0°) → FID. Stop waits for the current measurement. A new scan replaces previous records.",
+    demoScan: "T1 scan demo",
+    openScan: "Open full scan JSON",
+    openScanHint:
+      "Inspect recovery curves, fits and each point's FID/FFT without measuring again. A successful import replaces current records and scan settings.",
+    curve: "T1 inversion recovery",
+    responseEmpty: "Run a scan to display the response.",
+    view: "Signal to display",
+    magnitude: "Magnitude",
+    signed: "Signed signal",
+    quadrature: "Quadrature",
+    viewHint:
+      "The fit always uses signed signal. Magnitude and quadrature are display options for inspection.",
+    signedLegend: "● Signed signal — Exponential fit",
+    magnitudeLegend: "● Signal magnitude (common frequency)",
+    quadratureLegend: "● Quadrature",
+    fitValue: "T1: {T} ms · R² {r2}",
+    noFit: "T1: not yet available",
+    fitDetails:
+      "A {A} · B {B} · B/A {ratio} · RMSE {rmse} · {count} points · τ {from}–{to} ms",
+    fitFrom: "Fit start τ [ms]",
+    fitTo: "Fit end τ [ms]",
+    updateFit: "Update fit",
+    fitRangeError:
+      "Use a fit start of at least 1 ms and a fit end greater than the start.",
+    fitApplied: "Updated the fit range without measuring again.",
+    reference: "Common phase reference",
+    auto: "Automatic reference",
+    manual: "Selected-point reference",
+    referenceSummary:
+      "{kind} · {hz} Hz · Direction coherence {coherence} · Additional phase {phase}°",
+    autoReference: "Use automatic reference",
+    selectedReference: "Use selected point as phase reference",
+    phase: "Additional phase correction [°]",
+    reanalyzeAll: "Reanalyze all points",
+    referenceHint:
+      "A common frequency and phase preserve negative signals. The automatic reference aligns increasing recovery in the positive direction. For a manual reference, choose a sufficiently recovered positive FID.",
+    noReferenceSignal:
+      "No usable signal at the common frequency is available for a phase reference.",
+    noReference:
+      "The common phase reference will be analyzed from acquired points.",
+    invalidPhase: "Enter a finite number for phase correction.",
+    phaseApplied:
+      "Reanalyzed all points with the common phase reference and fit range.",
+    measuredPoints: "Measured points",
+    pointHint: "Select a τ value to inspect that point's FID and FFT.",
+    tau: "τ [ms]",
+    signal: "Signed signal",
+    selected: "FID and FFT at τ {tau} ms",
+    selectedEmpty: "Selected point's FID and FFT",
+    bandHint:
+      "The FFT graph displays ±10 kHz. Scan evaluation uses the peak search band entered in the form.",
+    selectedJson: "Selected point raw JSON",
+    saveScan: "Save scan data",
+    allJson: "Full scan JSON",
+    scanCsv: "T1 CSV",
+    archiveHint:
+      "Full scan JSON contains raw data for every point, scan settings, phase reference and fit range. A selected point's JSON can also be opened in Measurement. Save before closing the page.",
+    started: "Scan started. Waiting for the first measurement.",
+    progress: "{completed} / {total} points complete · τ {tau} ms",
+    complete: "Scan complete: {count} points. Save any data you need.",
+    stopped: "Scan stopped: {count} points. Acquired records are preserved.",
+    scanFailed:
+      "Scan interrupted. Acquired records are preserved. No automatic retry is performed.",
+    scanLoaded:
+      "Loaded scan data: {count} points. No commands were sent to the apparatus.",
+    demoScanSource: "Simulated scan · DEMO",
+    scanSource: "Hardware scan",
+  },
+};
+export function t1Text(template, values) {
+  return template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ""));
+}

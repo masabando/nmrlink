@@ -105,7 +105,7 @@ test("USB loss rejects the pending response and frees serial locks", async () =>
   await device.connect();
   const measurement = device.measure(parameters);
   port.unplug();
-  await assert.rejects(measurement, /USB unplugged/);
+  await assert.rejects(measurement, error => error.code === "SERIAL_READ_FAILED" && error.cause.message === "USB unplugged");
   assert.equal(device.state, "disconnected");
   assert.equal(port.closes, 1);
 });
@@ -114,7 +114,7 @@ test("chooser cancellation and missing browser API do not leave the device busy"
   const device = new NMRDevice({ transport: new WebSerialTransport({ serial: {
     requestPort: async () => { throw new Error("Chooser cancelled"); },
   } }) });
-  await assert.rejects(device.connect(), /cancelled/);
+  await assert.rejects(device.connect(), error => error.code === "SERIAL_CONNECTION_FAILED" && /cancelled/.test(error.cause.message));
   assert.equal(device.busy, false);
   assert.equal(device.state, "disconnected");
   await assert.rejects(new WebSerialTransport({ serial: null }).connect(), /unavailable/);

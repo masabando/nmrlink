@@ -1,8 +1,9 @@
+import { uiError } from "../shared/diagnostics.js";
 import { timeSummary } from "./timing.js";
 import { setupNavigation } from "./navigation.js";
-import { NMRController } from "../../packages/nmrlink/src/index.js";
-import { NMRGraphs } from "../../packages/nmrlink/src/graphs.js";
-import { saveMeasurement, saveGraphPng, readMeasurement, formatFileTimestamp } from "../../packages/nmrlink/src/browser.js";
+import { NMRController } from "./vendor/nmrlink-0.1.4/src/index.js";
+import { NMRGraphs } from "./vendor/nmrlink-0.1.4/src/graphs.js";
+import { saveMeasurement, saveGraphPng, readMeasurement, formatFileTimestamp } from "./vendor/nmrlink-0.1.4/src/browser.js";
 import { prepareAnalysis, createDemoRecord, fidCsv, fftCsv } from "./model.js";
 
 const element = id => document.getElementById(id);
@@ -39,7 +40,7 @@ function updateControls(state = latestState) {
   else if (state.operation === "connect") message("接続するシリアルポートを選択してください。");
 }
 controller.onStateChange(updateControls);
-controller.onError(error => message(error.message, true));
+controller.onError(error => message(uiError(error), true));
 controller.onResult(value => {
   showRecord(value);
   message("測定が完了しました。必要なデータを保存してください。");
@@ -99,7 +100,7 @@ function renderAnalysis() {
   } catch (error) {
     analysis = null;
     graphs?.clear();
-    element("analysis-status").textContent = `解析できませんでした：${error.message} 生データJSONは保存できます。`;
+    element("analysis-status").textContent = `解析できませんでした：${uiError(error)} 生データJSONは保存できます。`;
   }
   updateExports();
 }
@@ -141,7 +142,7 @@ for (const kind of ["fid", "fft"]) {
         filename: `nmrlink-${record.source}-${formatFileTimestamp(record.acquiredAt)}.${kind}.png`,
       });
     } catch (error) {
-      message(`PNGを保存できませんでした：${error.message}`, true);
+      message(`PNGを保存できませんでした：${uiError(error)}`, true);
     } finally {
       button.disabled = !analysis;
     }
@@ -161,7 +162,7 @@ element("json-file").onchange = async event => {
     showRecord(loaded, true);
     message(`JSONを読み込みました：${file.name}。装置への命令は送っていません。`);
   } catch (error) {
-    message(`読み込めませんでした：${error.message} 現在の結果は保持しています。`, true);
+    message(`読み込めませんでした：${uiError(error)} 現在の結果は保持しています。`, true);
   } finally {
     loading = false;
     event.target.value = ""; // Allow choosing the same file again after editing it.

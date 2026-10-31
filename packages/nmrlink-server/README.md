@@ -1,6 +1,6 @@
 # nmrlink-server
 
-NMR装置に接続したPCで動くNode.js用パッケージです。シリアル接続に加えて、Firebase経由の遠隔受付、利用許可、操作権、結果の取得と終了時削除を実装しています。[Firebase導入手順](../../docs/FIREBASE.md) を参照してください。
+NMR装置に接続したPCで動くNode.js用パッケージです。シリアル接続に加えて、Firebase経由の遠隔受付、利用許可、操作権、結果の取得と終了時削除を実装しています。[Firebase導入手順](https://masabando.github.io/nmrlink/guide/remote-admin/) を参照してください。
 
 ## 導入
 
@@ -87,4 +87,4 @@ NodeSerialTransportは共通NMRDeviceが使うconnect、disconnect、write、rea
 
 ブラウザでは `nmrlink-server/browser` のRemoteClientを使います。パッケージのルートはNode.js専用です。静的配信では相対URLからbrowser/remote-client.jsを読み込みます。
 
-[APIリファレンス](../../docs/API.md) にRemoteClient、RemoteAgent、FirebaseStoreの役割とライフサイクルをまとめています。通常の管理者はnpm startを使い、RemoteAgentの内部メソッドを直接呼ぶ必要はありません。遠隔接続とNode.js実ポートの動作は実環境で未検証です。
+[APIリファレンス](https://masabando.github.io/nmrlink/reference/api/) にRemoteClient、RemoteAgent、FirebaseStoreの役割とライフサイクルをまとめています。通常の管理者はnpm startを使い、RemoteAgentの内部メソッドを直接呼ぶ必要はありません。遠隔接続とNode.js実ポートの動作は実環境で未検証です。

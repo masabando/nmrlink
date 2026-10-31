@@ -1,4 +1,4 @@
-import { measurementDurationMs } from "../../packages/nmrlink/src/index.js";
+import { measurementDurationMs } from "./vendor/nmrlink-0.1.4/src/index.js";
 
 function duration(milliseconds) {
   const seconds = Math.ceil(milliseconds / 1000);

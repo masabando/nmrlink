@@ -28,3 +28,4 @@ export { measurementDurationMs } from "./timing.js";
 export { t2Delays, t2Parameters, t2Window, evaluateT2, runT2Sweep, analyzeT2 } from "./t2-sweep.js";
 export { fitT2 } from "./relaxation-fit.js";
 export { parseT2Measurement, MAX_T2_JSON_BYTES } from "./t2-record.js";
+export { ERROR_CODES } from "./errors.js";

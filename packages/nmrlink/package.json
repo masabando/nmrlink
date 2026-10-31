@@ -1,6 +1,6 @@
 {
   "name": "nmrlink",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "JavaScript library for educational NMR hardware control via Web Serial, signal analysis, and SVG graphs.",
   "type": "module",
   "keywords": [
@@ -37,6 +37,7 @@
   "files": [
     "src/",
     "README.md",
+    "README.ja.md",
     "LICENSE"
   ],
   "main": "./src/index.js"

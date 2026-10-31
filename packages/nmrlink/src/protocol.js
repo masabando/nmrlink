@@ -1,3 +1,4 @@
+import { createError } from "./errors.js";
 /** Wire format used by the prototype controller. See docs/PROTOCOL.md. */
 export const SAMPLE_COUNT = 2048;
 export const SAMPLE_INTERVAL_MS = 0.02;
@@ -36,21 +37,21 @@ const INTEGER_RANGES = {
 /** Validate and copy only the supported fields. @param {MeasurementParameters} input */
 export function validateParameters(input) {
   if (input === null || typeof input !== "object" || Array.isArray(input)) {
-    throw new TypeError("Measurement parameters must be an object.");
+    throw createError(TypeError, "INVALID_PARAMETERS");
   }
 
   const parameters = {};
   for (const [name, [minimum, maximum]] of Object.entries(INTEGER_RANGES)) {
     const value = input[name];
     if (!Number.isInteger(value) || value < minimum || value > maximum) {
-      throw new RangeError(`${name} must be an integer from ${minimum} to ${maximum}.`);
+      throw createError(RangeError, "INVALID_PARAMETER_RANGE", { name, minimum, maximum });
     }
     parameters[name] = value;
   }
 
   for (const name of ["phase1Degrees", "phase2Degrees"]) {
     if (![0, 90, 180, 270].includes(input[name])) {
-      throw new RangeError(`${name} must be 0, 90, 180, or 270.`);
+      throw createError(RangeError, "INVALID_PARAMETER_PHASE", { name });
     }
     parameters[name] = input[name];
   }
@@ -89,7 +90,7 @@ export function encodeCommand(command) {
     read: [0x72, 0x0d, 0x0a],
   };
   if (!Object.hasOwn(commands, command)) {
-    throw new RangeError(`Unsupported command: ${command}`);
+    throw createError(RangeError, "UNSUPPORTED_COMMAND", { command });
   }
   return new Uint8Array(commands[command]);
 }
@@ -97,11 +98,11 @@ export function encodeCommand(command) {
 /** Decode one complete channel-pair line. Invalid data is never replaced by zero. */
 export function parseSampleLine(line) {
   if (typeof line !== "string" || !/^-?\d+,-?\d+$/.test(line.trim())) {
-    throw new TypeError("Expected two comma-separated signed integers.");
+    throw createError(TypeError, "INVALID_SAMPLE_LINE");
   }
   const sample = line.trim().split(",").map(Number);
   if (!sample.every(Number.isSafeInteger)) {
-    throw new RangeError("Sample exceeds the safe integer range.");
+    throw createError(RangeError, "SAMPLE_OUT_OF_RANGE");
   }
   return sample;
 }

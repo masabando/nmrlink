@@ -12,24 +12,23 @@
     "export:remote": "node scripts/export-remote.js",
     "demo": "node scripts/demo.js",
     "test:demo": "node --test tests/demo/*.test.js",
-    "docs:build": "node scripts/build-docs.js",
-    "docs:check": "node scripts/check-docs.js",
+    "docs:build": "npm --prefix website run build",
+    "docs:check": "npm --prefix website run check",
     "test:direct": "node --test tests/direct/*.test.js",
-    "test:docs": "node --test tests/docs/*.test.js",
+    "test:docs": "npm --prefix website test",
     "test:standard": "node --test tests/standard/*.test.js",
-    "test:package": "node scripts/test-package.js"
+    "test:package": "node scripts/test-package.js",
+    "docs:dev": "npm --prefix website run dev"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",
     "esbuild": "^0.28.2",
     "firebase": "^13.0.0",
-    "firebase-tools": "^15.34.0",
-    "marked": "13.0.3",
-    "three": "0.180.0"
+    "firebase-tools": "^15.34.0"
   },
   "engines": {
     "node": ">=22"
   },
   "license": "MIT",
-  "version": "0.1.4"
+  "version": "0.2.0"
 }

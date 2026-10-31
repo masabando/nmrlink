@@ -30,7 +30,7 @@ test("controller retains successful raw results after device and UI failures", a
   const device = { state: "connected", async measure() { if (fail) throw new Error("wire failure"); return record; } };
   const controller = new NMRController({ device });
   const errors = [];
-  controller.onError(error => errors.push(error.message));
+  controller.onError(error => errors.push(error));
   const unsubscribe = controller.onResult(() => { throw new Error("plot failure"); });
   assert.equal((await controller.measure({})).ok, true);
   assert.equal(controller.result, record);
@@ -38,7 +38,8 @@ test("controller retains successful raw results after device and UI failures", a
   fail = true;
   assert.equal((await controller.measure({})).ok, false);
   assert.equal(controller.result, record);
-  assert.deepEqual(errors, ["plot failure", "wire failure"]);
+  assert.deepEqual(errors.map(error => error.code), ["OPERATION_FAILED", "OPERATION_FAILED"]);
+  assert.deepEqual(errors.map(error => error.cause.message), ["plot failure", "wire failure"]);
   device.state = "disconnected";
   assert.equal(controller.state.canConnect, true);
   controller.dispose();

@@ -19,8 +19,11 @@ const [packed] = JSON.parse(npm(["pack", "--workspace", "nmrlink", "--ignore-scr
 const files = packed.files.map(file => file.path);
 assert(files.includes("LICENSE"));
 assert(files.includes("README.md"));
+assert(files.includes("README.ja.md"));
+assert(files.includes("src/graph-labels.js"));
+assert(files.includes("src/errors.js"));
 assert(files.includes("package.json"));
-assert(files.every(file => file.startsWith("src/") || ["LICENSE", "README.md", "package.json"].includes(file)));
+assert(files.every(file => file.startsWith("src/") || ["LICENSE", "README.md", "README.ja.md", "package.json"].includes(file)));
 const archive = path.join(output, packed.filename);
 await writeFile(path.join(consumer, "package.json"), JSON.stringify({ name: "nmrlink-consumer-check", private: true, type: "module" }, null, 2) + "\n");
 npm(["install", "--offline", "--ignore-scripts", "--no-audit", "--no-fund", archive], consumer);
@@ -44,6 +47,8 @@ test("installed package parses, analyzes and plots without a DOM",()=>{
   assert(Math.abs(analysis.peak.hz-1200)<200);assert.equal(JSON.stringify(record),copy);
   assert.deepEqual(parseMeasurement(copy),JSON.parse(copy));assert(createRecordPlots(record).fid.startsWith("<svg"));
   assert(createFrequencyPlot([{frequencyHz:402000,amplitude:10}]).includes("<svg"));
+  assert(createRecordPlots(record,{locale:"en"}).fid.includes("Time [ms]"));
+  assert(createT2Plot([{tau:5,signal:10}],{locale:"en",labels:{yLabel:"Echo [a.u.]"}}).includes("Echo [a.u.]"));
 });
 test("installed optional entry points and curve fits resolve",()=>{
   for(const fn of [saveMeasurement,saveGraphPng,readMeasurement])assert.equal(typeof fn,"function");
@@ -67,10 +72,15 @@ execFileSync(process.execPath, ["--test", "consumer.test.mjs"], { cwd: consumer,
 
 const readme = await readFile(path.join(installed, "README.md"), "utf8");
 const snippets = [...readme.matchAll(/```js\n([\s\S]*?)\n```/g)].map(match => match[1]);
-const analysisExample = snippets.find(code => code.includes("const record =") && code.includes("createRecordPlots"));
-assert(analysisExample, "README analysis example is missing.");
-await writeFile(path.join(consumer, "readme-analysis.mjs"), analysisExample);
-execFileSync(process.execPath, ["readme-analysis.mjs"], { cwd: consumer, stdio: "pipe" });
+for (const name of ["README.md", "README.ja.md"]) {
+  const content = await readFile(path.join(installed, name), "utf8");
+  const examples = [...content.matchAll(/```js\n([\s\S]*?)\n```/g)].map(match => match[1]);
+  const analysisExample = examples.find(code => code.includes("const record =") && code.includes("createRecordPlots"));
+  assert(analysisExample, `${name} analysis example is missing.`);
+  const filename = `${name}-analysis.mjs`;
+  await writeFile(path.join(consumer, filename), analysisExample);
+  execFileSync(process.execPath, [filename], { cwd: consumer, stdio: "pipe" });
+}
 
 // This page imports only the installed archive, using native browser import maps.
 const html = `<!doctype html>
@@ -114,6 +124,6 @@ ${readmeHtml}
 <script type="importmap">{"imports":{"nmrlink":"./node_modules/nmrlink/src/index.js","nmrlink/graphs":"./node_modules/nmrlink/src/graphs.js","nmrlink/browser":"./node_modules/nmrlink/src/browser.js"}}</script>
 <script type="module">${mockDevice}\n${browserExample.replace("new NMRController()", "new NMRController({ device })")}</script></html>`;
 await writeFile(path.join(consumer, "readme.html"), readmePage);
-const report = { version: packed.version, private: manifest.private === true, archive, consumer, installed, files, compressedBytes: packed.size, unpackedBytes: packed.unpackedSize, checks: ["isolated tarball installation", "package entry points", "controller", "FFT and SVG", "pulse/T1/T2 fits", "README Node example", "license"], published: false };
+const report = { version: packed.version, private: manifest.private === true, archive, consumer, installed, files, compressedBytes: packed.size, unpackedBytes: packed.unpackedSize, checks: ["isolated tarball installation", "package entry points", "controller", "FFT and SVG", "pulse/T1/T2 fits", "English and Japanese README Node examples", "license"], published: false };
 await writeFile(path.join(output, "report.json"), JSON.stringify(report, null, 2) + "\n");
 console.log(JSON.stringify(report, null, 2));

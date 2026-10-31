@@ -21,18 +21,23 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            website/package-lock.json
       - run: npm ci
+      - run: npm ci --prefix website
       - run: npm test
       - run: npm run test:direct
       - run: npm run test:standard
       - run: npm run test:demo
       - run: npm run test:package
+      - run: npm --prefix website run lint
       - run: npm run docs:build
       - run: npm run docs:check
       - run: npm run test:docs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/pages
+          path: website/out
 
   deploy:
     needs: build

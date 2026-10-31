@@ -1,8 +1,9 @@
+import { uiError, uiWarnings } from "../shared/diagnostics.js";
 import { timeSummary } from "./timing.js";
 import { setupNavigation } from "./navigation.js";
-import { NMRController, parseT2Measurement, MAX_T2_JSON_BYTES, t2Delays, t2Parameters, evaluateT2, t2Window, analyzeMeasurement, runT2Sweep, analyzeT2 } from "../../packages/nmrlink/src/index.js";
-import { NMRGraphs, createT2Plot } from "../../packages/nmrlink/src/graphs.js";
-import { saveMeasurement, saveGraphPng, formatFileTimestamp } from "../../packages/nmrlink/src/browser.js";
+import { NMRController, parseT2Measurement, MAX_T2_JSON_BYTES, t2Delays, t2Parameters, evaluateT2, t2Window, analyzeMeasurement, runT2Sweep, analyzeT2 } from "./vendor/nmrlink-0.1.4/src/index.js";
+import { NMRGraphs, createT2Plot } from "./vendor/nmrlink-0.1.4/src/graphs.js";
+import { saveMeasurement, saveGraphPng, formatFileTimestamp } from "./vendor/nmrlink-0.1.4/src/browser.js";
 import { createDemoRecord } from "./model.js";
 
 const element = id => document.getElementById(id);
@@ -42,7 +43,7 @@ function updateControls(next = state) {
   element("connection").classList.toggle("connected", state.connection === "connected");
 }
 controller.onStateChange(updateControls);
-controller.onError(error => message(error.message, true));
+controller.onError(error => message(uiError(error), true));
 element("support").textContent = "serial" in navigator ? "接続後、装置と試料に合う条件を確認してください。" : "実機接続にはWeb Serial対応ブラウザとHTTPSまたはlocalhostが必要です。デモはそのまま試せます。";
 element("connect").onclick = () => controller.connect();
 element("disconnect").onclick = () => controller.disconnect();
@@ -68,7 +69,7 @@ function plan() {
     const p = formSettings();
     element("time-estimate").textContent = timeSummary(p.delays.map(value => ({ ...p.parameters, pulseIntervalMs: value })), "double");
     element("plan").textContent = `${p.delays.length}点 · 最終点 ${p.delays.at(-1)} ms · 各点 ${p.parameters.scans}回積算`;
-  } catch (error) { element("plan").textContent = error.message; element("time-estimate").textContent = "見込み時間：測定条件を確認してください。"; }
+  } catch (error) { element("plan").textContent = uiError(error); element("time-estimate").textContent = "見込み時間：測定条件を確認してください。"; }
 }
 element("sweep-form").oninput = plan;
 element("sweep-form").onchange = plan;
@@ -89,15 +90,15 @@ function reanalyze() {
     element("reference").textContent = `${referenceIndex === null ? "自動基準" : "選択点の基準"} · ${ref.hz.toFixed(1)} Hz`;
   } catch (error) {
     calibration = null;
-    element("reference").textContent = `基準を求められません：${error.message}`;
+    element("reference").textContent = `基準を求められません：${uiError(error)}`;
   }
 }
 function refresh() {
   drawCurve();
   const fit = calibration?.fit;
   element("best").textContent = fit ? `T2：${fit.T.toFixed(2)} ms · R² ${fit.r2.toFixed(4)}` : "T2：未確定";
-  element("fit").textContent = fit ? `A ${fit.A.toPrecision(5)} · 背景0 · RMSE ${fit.rmse.toPrecision(4)} · ${fit.n}点 · 2τ ${fit.from}〜${fit.to} ms` : (calibration?.warnings.join(" ") || "取得した信号を確認してください。");
-  if (fit && calibration.warnings.length) element("fit").textContent += ` · ${calibration.warnings.join(" ")}`;
+  element("fit").textContent = fit ? `A ${fit.A.toPrecision(5)} · 背景0 · RMSE ${fit.rmse.toPrecision(4)} · ${fit.n}点 · 2τ ${fit.from}〜${fit.to} ms` : (uiWarnings(calibration) || "取得した信号を確認してください。");
+  if (fit && calibration.warnings.length) element("fit").textContent += ` · ${uiWarnings(calibration)}`;
   for (const id of ["json", "csv", "png"]) element(id).disabled = !points.length;
   element("points").replaceChildren();
   for (const [index, point] of points.entries()) {
@@ -127,7 +128,7 @@ async function start(demo) {
   if (running || loading || state.busy) return;
   let prepared;
   try { prepared = formSettings(); fitRange(); }
-  catch (error) { message(error.message, true); return; }
+  catch (error) { message(uiError(error), true); return; }
   if (!demo && !state.canMeasure) { message("先に装置へ接続してください。", true); return; }
   settings = prepared;
   points = [];
@@ -165,7 +166,7 @@ async function start(demo) {
     }
     if (points.length) selectPoint(maximum());
     message(`${demo ? "模擬走査" : "走査"}${result.stopped ? "を停止しました" : "が完了しました"}：${points.length}点。必要なデータを保存してください。`);
-  } catch (error) { message(`走査を中断しました：${error.message}。取得済みの${points.length}点は保持しています。自動再送は行いません。`, true); }
+  } catch (error) { message(`走査を中断しました：${uiError(error)}。取得済みの${points.length}点は保持しています。自動再送は行いません。`, true); }
   finally { running = false; updateControls(); refresh(); }
 }
 element("sweep-form").onsubmit = event => { event.preventDefault(); start(false); };
@@ -183,7 +184,7 @@ element("apply-analysis").onclick = () => {
     reanalyze();
     selectPoint(selected ?? maximum());
     message("取得済みの全点を再解析しました。再測定は行っていません。");
-  } catch(error) { message(error.message,true); }
+  } catch(error) { message(uiError(error),true); }
 };
 element("auto-reference").onclick = () => { referenceIndex = null; reanalyze(); refresh(); };
 element("set-reference").onclick = () => {
@@ -226,7 +227,7 @@ element("png").onclick = async () => {
   const svg = element("curve").querySelector("svg");
   if (!svg) return;
   try { await saveGraphPng(svg, { filename: `nmrlink-${source}-t2-${formatFileTimestamp(startedAt)}.png` }); }
-  catch (error) { message(`PNGを保存できませんでした：${error.message}`, true); }
+  catch (error) { message(`PNGを保存できませんでした：${uiError(error)}`, true); }
 };
 
 setupNavigation({
@@ -266,6 +267,6 @@ element("json-file").onchange = async event => {
     reanalyze();
     selectPoint(maximum());
     message(`保存データを読み込みました：${points.length}点。装置への命令は送っていません。`);
-  } catch (error) { message(`読み込めませんでした：${error.message}。現在の記録は保持しています。`, true); }
+  } catch (error) { message(`読み込めませんでした：${uiError(error)}。現在の記録は保持しています。`, true); }
   finally { loading = false; updateControls(); plan(); }
 };

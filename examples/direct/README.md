@@ -10,11 +10,11 @@ HTTPSまたは同じPCのlocalhostと、Web Serial対応のデスクトップブ
 
 結果は補正前の生データです。新しい測定の成功時に置き換えます。測定失敗時には前回の結果を残します。ページを閉じる・再読み込みすると消えます。Firebaseやサーバープログラムは不要です。
 
-自作UIでの呼び出し方は [APIリファレンス](../../docs/API.md) を参照してください。遠隔用の秘密設定を置いた作業フォルダ全体を配信しないでください。
+自作UIでの呼び出し方は [APIリファレンス](https://masabando.github.io/nmrlink/reference/api/) を参照してください。遠隔用の秘密設定を置いた作業フォルダ全体を配信しないでください。
 
 ## GitHub Pagesで使う
 
-ドキュメントサイトの「直接接続サンプルを開く」から利用できます。公開用にはnpm run docs:buildで必要なサンプルとライブラリだけをdist/pages/へコピーします。Pagesでの生成・配信では秘密設定を含むチェックアウト全体を公開しません。[公開手順](../../docs/PAGES.md) を参照してください。
+ドキュメントサイトの「直接接続サンプルを開く」から利用できます。公開用にはnpm run docs:buildで必要なサンプルとライブラリだけをwebsite/out/へコピーします。Pagesでの生成・配信では秘密設定を含むチェックアウト全体を公開しません。[公開手順](../../website/README.md) を参照してください。
 
 ## 波形とスペクトル
 
@@ -26,6 +26,6 @@ HTTPSまたは同じPCのlocalhostと、Web Serial対応のデスクトップブ
 
 ## コードを読む順番
 
-index.htmlは画面、app.jsはフォームとイベントの結び付けです。操作状態・排他・結果保持はNMRController、補正・FFT・ピーク探索はanalyzeMeasurement、グラフ生成とリサイズはNMRGraphs、JSON保存はsaveMeasurementへ任せています。描画実装はサンプル内に置かず、packages/nmrlink/src/graphs.jsを使います。組み込みの順番は [自作Web UIの作り方](../../docs/UI.md)、各APIの引数・例外処理・終了処理は [APIリファレンス](../../docs/API.md) を参照してください。
+index.htmlは画面、app.jsはフォームとイベントの結び付けです。操作状態・排他・結果保持はNMRController、補正・FFT・ピーク探索はanalyzeMeasurement、グラフ生成とリサイズはNMRGraphs、JSON保存はsaveMeasurementへ任せています。描画実装はサンプル内に置かず、packages/nmrlink/src/graphs.jsを使います。組み込みの順番は [自作Web UIの作り方](https://masabando.github.io/nmrlink/guide/first/)、各APIの引数・例外処理・終了処理は [APIリファレンス](https://masabando.github.io/nmrlink/reference/api/) を参照してください。
 
-線色はNMRGraphsのcolorsオプションでdata1・data2・fftを個別に指定できます。未指定の色は既定値を使い、リサイズ後も維持します。例と凡例の扱いは [自作UIの手順](../../docs/UI.md) を参照してください。
+線色はNMRGraphsのcolorsオプションでdata1・data2・fftを個別に指定できます。未指定の色は既定値を使い、リサイズ後も維持します。例と凡例の扱いは [自作UIの手順](https://masabando.github.io/nmrlink/guide/first/) を参照してください。

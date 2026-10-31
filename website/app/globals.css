@@ -1,0 +1,70 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: cupcake --default;
+}
+
+/* 説明ページ共通。文字の基準はlayout.tsx、見出しと要素間の余白はここで調整します。 */
+.documentation h1 {
+  margin-bottom: 2rem;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.documentation h2 {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.documentation h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.documentation p,
+.documentation ul,
+.documentation ol {
+  margin-block: 1rem;
+}
+
+.documentation ul { list-style: disc; padding-left: 1.5rem; }
+.documentation ol { list-style: decimal; padding-left: 1.5rem; }
+.documentation li { margin-block: 0.5rem; }
+.documentation a { text-decoration: underline; text-underline-offset: 3px; }
+.documentation a:hover { opacity: 0.7; }
+.documentation p code,
+.documentation li code {
+  border-radius: 0.25rem;
+  background: var(--color-base-200);
+  padding: 0.125rem 0.25rem;
+  font-size: 0.9em;
+}
+
+.documentation table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.documentation th,
+.documentation td {
+  border-bottom: 1px solid var(--color-base-300);
+  padding: 0.75rem 1rem;
+  vertical-align: top;
+}
+
+.documentation th { background: var(--color-base-200); font-weight: 600; }
+
+.documentation :is(h1, h2, h3) { text-wrap: balance; }
+
+/* 固定ヘッダーが見出しや本文への移動先を隠さないようにします。 */
+.documentation :is(h1, h2, h3),
+#main-content,
+#measurement-content { scroll-margin-top: 6rem; }

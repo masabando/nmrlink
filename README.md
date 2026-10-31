@@ -1,21 +1,35 @@
 # NMRLink
 
+English | [日本語](./README.ja.md)
+
 [![version](https://img.shields.io/github/v/tag/masabando/nmrlink?style=flat&label=version)](https://github.com/masabando/nmrlink/tags)
 [![GitHub stars](https://img.shields.io/github/stars/masabando/nmrlink?style=flat&logo=github)](https://github.com/masabando/nmrlink/stargazers)
 [![last commit](https://img.shields.io/github/last-commit/masabando/nmrlink?style=flat)](https://github.com/masabando/nmrlink/commits/main/)
 [![docs build](https://img.shields.io/github/actions/workflow/status/masabando/nmrlink/pages.yml?branch=main&style=flat&label=docs)](https://github.com/masabando/nmrlink/actions/workflows/pages.yml)
 
-[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
+A JavaScript library for the educational NMR apparatus developed by [Yasushi Kondo (Kindai University)](https://researchmap.jp/kondo_yasushi). Build your own Web UI with Web Serial connectivity, measurement control, signal analysis, and graphs, or use the included standard Web UI.
 
-[ドキュメント](https://masabando.github.io/nmrlink/) · [npm](https://www.npmjs.com/package/nmrlink) · [標準Web UI](https://masabando.github.io/nmrlink/examples/standard/) · [最小サンプル](./examples/direct/)
+[Documentation](https://masabando.github.io/nmrlink/en/) · [npm](https://www.npmjs.com/package/nmrlink) · [Standard Web UI](https://masabando.github.io/nmrlink/ui/?lang=en) · [Minimal example](./examples/direct/)
 
-## 対象装置と入手について
+## Hardware
 
-実際の測定には、対応する学生実験用NMR装置が必要です。一般のNMR装置を共通に制御するライブラリではありません。実機なしでも、模擬データによる表示や操作のデモを試せます。
+Real measurements require the supported educational NMR apparatus and a USB serial connection. NMRLink is specific to this apparatus; it is not a universal interface for NMR instruments. Simulated data lets you try the graphs and controls without hardware.
 
-装置は教材販売会社を通じての販売が計画されています。
+Distribution of the apparatus through an educational equipment supplier is planned.
 
-## ライブラリを使う
+## Use the Web UI
+
+Open the [standard Web UI](https://masabando.github.io/nmrlink/ui/?lang=en) to use:
+
+- Single/Double measurements, FID and FFT graphs, adjustable analysis ranges and window functions
+- Frequency adjustment, pulse calibration, T1/T2 measurements and curve fitting
+- JSON save/load, CSV export, and SVG/PNG graph downloads
+
+Direct hardware access requires a desktop browser with Web Serial support and HTTPS or localhost on the same PC. Check the [browser and connection guide](https://masabando.github.io/nmrlink/en/guide/browsers/) before connecting. Confirm measurement settings for your apparatus and sample. An active measurement cannot be stopped immediately.
+
+The Web UI supports Japanese and English and can be served as static files. Direct connection needs no Firebase configuration or persistent Node.js process.
+
+## Build your own Web UI
 
 ```sh
 npm install nmrlink
@@ -27,51 +41,16 @@ import { NMRGraphs } from "nmrlink/graphs";
 import { saveMeasurement } from "nmrlink/browser";
 ```
 
-Viteなどのバンドラーから利用できます。ビルドなしの静的HTMLでは、リポジトリ内のソースを相対URLで読み込めます。表示例とコピーして使えるコードは[導入ガイド](https://masabando.github.io/nmrlink/guide/install.html)、APIの詳細は[リファレンス](https://masabando.github.io/nmrlink/docs/API.html)を参照してください。
+Use a bundler such as Vite, or import the sources by relative URL in static HTML without a build step. See the [installation guide](https://masabando.github.io/nmrlink/en/guide/install/), [package README](./packages/nmrlink/README.md), and [minimal example](./examples/direct/).
 
-ES modules形式で、実行時依存パッケージはありません。TypeScript型定義は含みません。
+NMRLink provides readable ES modules with no runtime dependencies. It does not include CommonJS builds or TypeScript declarations.
 
-## 標準Web UIを使う
+## Remote access — unverified
 
-[標準Web UI](https://masabando.github.io/nmrlink/examples/standard/)から測定できます。実機なしで試すための模擬データ表示もあります。
+Remote access uses a Node.js program on the apparatus PC and Firebase. This configuration has not been verified in a real deployment; please avoid using it for now. See the [remote access guide](https://masabando.github.io/nmrlink/en/guide/remote/).
 
-- Single・Double測定、FID・FFT表示、解析範囲・窓関数の変更
-- 周波数調整、パルス校正、T1・T2測定と近似
-- JSON保存・読み込み、CSV出力、SVG・PNG保存
+## Original program and license
 
-実機への接続にはWeb Serial対応のデスクトップブラウザ、HTTPSまたは同じPCのlocalhost、USBシリアル接続が必要です。装置・試料に合わせて測定条件を確認してください。測定中の即時停止には対応していません。
+NMRLink is based on the Python control program provided by [Yasushi Kondo (Kindai University)](https://researchmap.jp/kondo_yasushi). The [original Python program](./original/) is also available with permission.
 
-自分のWebサーバーで使う場合は、このリポジトリの直接接続用コピーを配信し、`examples/standard/` を開きます。FirebaseやNode.jsの常駐プログラムは不要です。自作UIの構成は[最小サンプル](./examples/direct/)で確認できます。
-
-## 遠隔接続（未検証）
-
-装置側PCのNode.jsプログラムとFirebaseを介して利用する構成です。実環境では未検証のため、現時点での利用はお控えください。[遠隔接続の説明](https://masabando.github.io/nmrlink/guide/remote.html)を参照してください。
-
-実機とFirebase設定を使わずに操作の流れを試す場合は、Node.js 24でリポジトリのルートから実行します。
-
-```sh
-npm ci
-npm run demo
-```
-
-表示されたURLを開きます。詳しくは[デモの使い方](./examples/demo/README.md)を参照してください。
-
-## リポジトリの構成
-
-| フォルダ | 内容 |
-| --- | --- |
-| [packages/nmrlink](./packages/nmrlink/) | 装置制御・Web Serial・解析・グラフ・保存。npm配布対象 |
-| [packages/nmrlink-server](./packages/nmrlink-server/) | Node.jsシリアル接続・Firebase連携。npm未公開 |
-| [examples](./examples/) | 標準Web UI・最小サンプル・遠隔サンプル・デモ |
-| site / model | ドキュメントサイトの原稿・3Dモデル |
-| docs | 通信仕様・組み込み・ビルド手順 |
-| tests | 通信・解析・画面用処理のテスト |
-| [original](./original/) | [近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)から提供されたPythonプログラム |
-
-テストは `npm test`、配布物の独立インストール確認は `npm run test:package` で実行します。サイトの生成・参照確認は `npm run docs:build` と `npm run docs:check` です。[サイトのビルド手順](./docs/PAGES.md)も参照してください。
-
-## 原本とライセンス
-
-[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)から提供された装置制御プログラムをもとに開発しています。許可を得て公開している[Pythonの原本](./original/)も参照できます。
-
-NMRLink本体は[MITライセンス](./LICENSE)です。`original/` のPythonプログラムもMITライセンスです。第三者のライブラリ・素材には、それぞれのライセンスが適用されます。
+NMRLink is distributed under the [MIT license](./LICENSE). The original Python program has its own [MIT license and copyright notice](./original/LICENSE). Third-party libraries and assets retain their respective licenses.

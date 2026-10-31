@@ -1,42 +1,42 @@
 # nmrlink
 
-[近藤 康（近畿大学）](https://researchmap.jp/kondo_yasushi)が開発を進めてきた学生実験用のNMR装置を制御するJavaScriptライブラリです。Web Serial APIによる接続、測定データの解析、グラフ表示を自分のWeb UIに組み込めます。
+English | [日本語](https://github.com/masabando/nmrlink/blob/main/packages/nmrlink/README.ja.md)
 
-[ドキュメント](https://masabando.github.io/nmrlink/) · [API](https://masabando.github.io/nmrlink/docs/API.html) · [標準Web UI](https://masabando.github.io/nmrlink/examples/standard/) · [GitHub](https://github.com/masabando/nmrlink)
+A JavaScript library for the educational NMR apparatus developed by [Yasushi Kondo (Kindai University)](https://researchmap.jp/kondo_yasushi). Add Web Serial connectivity, measurement control, signal analysis, and graphs to your own Web UI.
 
-## 対象装置と入手について
+[Documentation](https://masabando.github.io/nmrlink/en/) · [API](https://masabando.github.io/nmrlink/en/reference/api/) · [Standard Web UI](https://masabando.github.io/nmrlink/ui/?lang=en) · [GitHub](https://github.com/masabando/nmrlink)
 
-実際の測定には、対応する学生実験用NMR装置が必要です。一般のNMR装置を共通に制御するライブラリではありません。実機なしでも、模擬データによる表示や操作のデモを試せます。
+## Hardware
 
-装置は教材販売会社を通じての販売が計画されています。
+Real measurements require the supported educational NMR apparatus. NMRLink is specific to this apparatus; it is not a universal interface for NMR instruments. You can try analysis and graph generation with simulated data without hardware.
 
-## 導入
+Distribution of the apparatus through an educational equipment supplier is planned.
+
+## Install
 
 ```sh
 npm install nmrlink
 ```
 
-ビルドなしの静的HTMLから使う方法は[導入ガイド](https://masabando.github.io/nmrlink/guide/install.html)を参照してください。
+Use package imports with a browser bundler such as Vite. For static HTML without a build step, use an import map or relative URLs to the source modules; see the [installation guide](https://masabando.github.io/nmrlink/en/guide/install/).
 
-## 対応環境と配布内容
+## Requirements
 
-- 実機の直接接続にはWeb Serial対応デスクトップブラウザとHTTPSまたは同じPCのlocalhostが必要です。接続する装置はNMRLinkの通信仕様に対応している必要があります。
-- ES modules形式のJavaScriptを提供します。CommonJS形式とTypeScript型定義は含みません。
-- ライブラリ自体の実行時依存パッケージはありません。Node.jsから解析やSVG生成を使う場合にDOMは不要です。
-- パッケージには読みやすい `src/`、このREADME、MITライセンスを含みます。ソースは圧縮・難読化していません。
+- Direct hardware access requires a desktop browser with Web Serial support, HTTPS or localhost on the same PC, and a USB serial connection. See [browser support and connection troubleshooting](https://masabando.github.io/nmrlink/en/guide/browsers/).
+- The package provides ES modules, with no runtime dependencies. CommonJS builds and TypeScript declarations are not included.
+- Analysis and SVG generation also work in Node.js without a DOM.
+- The package includes readable, unminified `src/` files, English and Japanese READMEs, and the MIT license.
 
-ブラウザアプリのViteなどのバンドラー環境ではパッケージ名でimportします。素のHTMLではimport mapか、ソースへの相対URLが必要です。[ビルドなしで使う方法](https://masabando.github.io/nmrlink/guide/install.html)も参照してください。
+## Measure from your own Web UI
 
-## 自分のWeb UIから測定する
-
-次の例はバンドラー環境のブラウザ用コードです。HTMLに接続・測定・切断・保存ボタン、状態欄、2つのグラフ表示先を用意します。
+This example runs in a browser with a bundler. Add buttons, a status field, and two graph containers to your HTML:
 
 ```html
-<button id="connect">接続</button>
-<button id="measure" disabled>測定</button>
-<button id="disconnect" disabled>切断</button>
-<button id="save" disabled>生データJSONを保存</button>
-<p id="status" role="status">未接続</p>
+<button id="connect">Connect</button>
+<button id="measure" disabled>Measure</button>
+<button id="disconnect" disabled>Disconnect</button>
+<button id="save" disabled>Save raw JSON</button>
+<p id="status" role="status">Disconnected</p>
 <div id="fid"></div>
 <div id="fft"></div>
 ```
@@ -48,9 +48,9 @@ import { saveMeasurement } from "nmrlink/browser";
 
 const get = id => document.getElementById(id);
 const controller = new NMRController();
-const graphs = new NMRGraphs({ fid: get("fid"), fft: get("fft") });
+const graphs = new NMRGraphs({ fid: get("fid"), fft: get("fft"), locale: "en" });
 
-// 装置・試料に合わせて確認する値です。校正済みの値へ変更してください。
+// Check these settings for your apparatus and sample. Use calibrated values.
 const parameters = {
   frequencyHz: 402000,
   pulse1Cycles: 21, phase1Degrees: 0,
@@ -68,14 +68,14 @@ controller.onResult(record => {
   get("save").disabled = false;
   try {
     graphs.show(record, analyzeMeasurement(record));
-    get("status").textContent = "測定が完了しました。";
+    get("status").textContent = "Measurement complete.";
   } catch (error) {
     graphs.clear();
-    get("status").textContent = `解析できませんでした：${error.message}`;
+    get("status").textContent = `Analysis failed: ${error.message}`;
   }
 });
 
-// ポート選択はクリックから直接呼び出します。
+// Request a port directly from a user click.
 get("connect").onclick = () => controller.connect();
 get("measure").onclick = () => controller.measure(parameters, { mode: "single" });
 get("disconnect").onclick = () => controller.disconnect();
@@ -84,11 +84,11 @@ get("save").onclick = () => {
 };
 ```
 
-接続・測定のエラーは `onError` に通知され、操作は `{ ok, value, error }` を返します。低水準の `NMRDevice` はエラー時にrejectします。測定の自動再送や進行中の測定の即時停止は行いません。画面を破棄するときは、処理完了後に切断し、`graphs.dispose()` と `controller.dispose()` で監視を終了します。
+Connection and measurement errors are reported through `onError`; controller operations return `{ ok, value, error }`. The lower-level `NMRDevice` rejects on errors. Measurements are not automatically retried, and an active measurement cannot be stopped immediately. When removing the UI, wait for any operation to finish, disconnect, and call `graphs.dispose()` and `controller.dispose()` to release listeners.
 
-## 実機なしで解析する
+## Analyze without hardware
 
-Node.jsまたはブラウザで実行できます。2チャンネルを複素信号として解析します。
+Run this example in Node.js or a browser. The two channels form a complex signal.
 
 ```js
 import { analyzeMeasurement } from "nmrlink";
@@ -107,23 +107,53 @@ const record = {
   }),
 };
 const analysis = analyzeMeasurement(record, { startMs: 1, endMs: 5 });
-console.log(analysis.peak.hz); // 受信周波数からの差 [Hz]。FFTビン値。
-const svg = createRecordPlots(record); // { fid, fft, ... }
-console.log(svg.fid); // SVG文字列。Node.jsでも生成できます。
+console.log(analysis.peak.hz); // Offset from the receive frequency [Hz], at an FFT bin.
+const svg = createRecordPlots(record, { locale: "en" }); // { fid, fft, ... }
+console.log(svg.fid); // SVG string; also works in Node.js.
 ```
 
-## import先
+## Graph language and labels
 
-| 入口 | 主な機能 |
+Graph APIs accept `locale: "ja"` (the default) or `"en"`. Override individual strings with `labels`; this does not convert numeric values or units.
+
+```js
+const graphs = new NMRGraphs({
+  fid: fidElement, fft: fftElement,
+  locale: "en",
+  labels: { fid: { xLabel: "Time [ms]", yLabel: "Signal [a.u.]" } },
+});
+```
+
+`NMRGraphs` and `createRecordPlots` use `labels.fid` and `labels.fft`. Curve functions accept `title`, `xLabel`, and `yLabel` directly within `labels`. Omitted labels use the selected language's defaults. See the [graph API](https://masabando.github.io/nmrlink/en/reference/api/graphs/) for all labels and templates.
+
+## Entry points
+
+| Import | Main features |
 | --- | --- |
-| `nmrlink` | NMRDevice、NMRController、条件検証、補正・FFT、走査、T1/T2解析、保存JSONの解析 |
-| `nmrlink/graphs` | NMRGraphs、createRecordPlots、周波数・パルス・T1/T2のSVG生成 |
-| `nmrlink/browser` | JSON・PNGの保存、測定JSONの読み込み、JSTファイル名の日時書式 |
+| `nmrlink` | NMRDevice, NMRController, parameter validation, baseline correction, FFT, sweeps, T1/T2 analysis, saved JSON parsing |
+| `nmrlink/graphs` | NMRGraphs, createRecordPlots, frequency/pulse/T1/T2 SVG plots |
+| `nmrlink/browser` | JSON/PNG downloads, measurement JSON loading, JST filename timestamps |
 
-[グラフの表示例とコピー用コード](https://masabando.github.io/nmrlink/guide/frequencygraph.html)や[APIリファレンス](https://masabando.github.io/nmrlink/docs/API.html)から用途別に確認できます。
+See the [graph examples](https://masabando.github.io/nmrlink/en/guide/graphs/) and [API reference](https://masabando.github.io/nmrlink/en/reference/api/) for examples you can copy.
 
-## ライセンス
+## Errors and warnings
 
-MIT。作者：Masamitsu Bando。配布物内のLICENSEを参照してください。
+Library-generated exceptions have an English `message`, a stable `code`, and structured `details`. They retain their error types, such as `TypeError` or `RangeError`. Use `ERROR_CODES` exported from `nmrlink`, or code strings, for branching and UI translation; do not match message text. Browser or OS exceptions wrapped at operation boundaries are preserved as `cause`.
 
-GitHubの `original/` にある提供元のPythonプログラムもMITライセンスで公開しています。このnpmパッケージには含みません。
+```js
+try {
+  analyzeMeasurement(record, { startMs: 5, endMs: 1 });
+} catch (error) {
+  if (error.code === "INVALID_FFT_RANGE") {
+    // Show a message in the language of your UI.
+  }
+}
+```
+
+`analyzePulseCalibration`, `analyzeT1`, and `analyzeT2` return English strings in `warnings` and corresponding `{ code, message, details }` entries in `warningDetails`, in the same order. Use codes to translate warnings as well. Graph `locale` does not translate errors or warnings. See [error codes and warnings](https://masabando.github.io/nmrlink/en/reference/api/#error-codes).
+
+## License
+
+MIT. Author: Masamitsu Bando. See the LICENSE file included in the package.
+
+The original Python program provided by Yasushi Kondo is also available under MIT in the repository's [`original/` directory](https://github.com/masabando/nmrlink/tree/main/original), with its own copyright notice. It is not included in this npm package.

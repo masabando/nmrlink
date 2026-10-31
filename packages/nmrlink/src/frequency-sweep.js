@@ -1,3 +1,4 @@
+import { createError } from "./errors.js";
 import { integerSteps, runSingleSweep } from "./sweep.js";
 import { analyzeMeasurement } from "./analysis.js";
 
@@ -10,10 +11,10 @@ export function frequencySteps(startHz, endHz, stepHz) {
 export function evaluateFrequency(record, {
   startMs = 1, endMs = 5, tailPoints = 100, window = "hann", minHz = -3000, maxHz = 3000,
 } = {}) {
-  if (![minHz, maxHz].every(Number.isFinite) || minHz >= maxHz) throw new RangeError("探索帯域は下限より上限を大きく指定してください。");
+  if (![minHz, maxHz].every(Number.isFinite) || minHz >= maxHz) throw createError(RangeError, "INVALID_SEARCH_BAND");
   const analysis = analyzeMeasurement(record, { startMs, endMs, tailPoints, window });
   const bins = analysis.spectrum.bins.filter(bin => bin.hz >= minHz && bin.hz <= maxHz);
-  if (!bins.length) throw new RangeError("探索帯域にFFTビンがありません。");
+  if (!bins.length) throw createError(RangeError, "NO_FFT_BINS");
   const peak = bins.reduce((best, bin) => bin.amplitude > best.amplitude ? bin : best);
   return { frequencyHz: record.parameters.frequencyHz, amplitude: peak.amplitude, peakHz: peak.hz, record };
 }

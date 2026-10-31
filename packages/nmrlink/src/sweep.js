@@ -1,12 +1,13 @@
+import { createError } from "./errors.js";
 import { validateParameters, SAMPLE_COUNT, SAMPLE_INTERVAL_MS } from "./protocol.js";
 
 /** Shared integer grid for frequency and pulse scans. */
 export function integerSteps(start, end, step, maximum) {
   if (![start, end, step].every(Number.isInteger) || start < 1 || end > maximum || end < start || step < 1) {
-    throw new RangeError(`走査範囲は1〜${maximum}の整数、開始≤終了、刻み幅は1以上で指定してください。`);
+    throw createError(RangeError, "INVALID_SWEEP_RANGE", { maximum });
   }
   const count = Math.floor((end - start) / step) + 1;
-  if (count > 201) throw new RangeError("走査は201点以内で指定してください。");
+  if (count > 201) throw createError(RangeError, "SWEEP_TOO_MANY_POINTS");
   return Array.from({ length: count }, (_, index) => start + index * step);
 }
 
@@ -16,7 +17,7 @@ export async function runSingleSweep(device, parameters, {
 }) {
   const common = validateParameters(parameters);
   const planned = values.map(value => validateParameters({ ...common, [field]: value }));
-  if (!["single", "double"].includes(mode)) throw new TypeError("Invalid measurement mode.");
+  if (!["single", "double"].includes(mode)) throw createError(TypeError, "INVALID_MODE");
   planned.forEach(validateMeasurement);
   const settings = { ...analysis };
   evaluate({ parameters: common, sampleIntervalMs: SAMPLE_INTERVAL_MS, raw: Array.from({ length: SAMPLE_COUNT }, () => [0, 0]) }, settings);

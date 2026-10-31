@@ -1,4 +1,4 @@
-import { analyzeMeasurement } from "../../packages/nmrlink/src/index.js";
+import { analyzeMeasurement } from "./vendor/nmrlink-0.1.4/src/index.js";
 
 /** Validate display limits separately from analysis; never modify the record. */
 export function prepareAnalysis(record, settings) {
