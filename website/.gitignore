@@ -44,3 +44,5 @@ next-env.d.ts
 /public/pagefind/
 
 /storybook-static/
+
+/public/storybook/

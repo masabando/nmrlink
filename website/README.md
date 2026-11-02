@@ -7,7 +7,7 @@ npm install
 npm run dev
 ```
 
-開発プレビューは `http://localhost:3000/`。リポジトリのルートからは `npm run docs:dev` でも起動できます。
+開発プレビューは `http://localhost:3000/`。起動時にStorybookもビルドし、同じサーバーの `/storybook/` で表示します。ドキュメント内のリンクもそのまま使えます。Storybookの表示は起動時点の内容で、更新するには開発サーバーを再起動します。リポジトリのルートからは `npm run docs:dev` でも起動できます。
 
 ## 静的出力と検索
 
@@ -79,3 +79,15 @@ npm run storybook:build
 ```
 
 静的出力は `website/storybook-static/` です。Git対象外です。`npm run docs:build` ではStorybookもビルドし、`website/out/storybook/` に同梱します。公開URLは `/nmrlink/storybook/` です。ライブラリの配布内容やAPIも変更しません。
+
+### その他の表示部品
+
+- `stories/Connection.stories.jsx`：接続パネルの未接続・接続済み・測定中・読み込み中・非対応ブラウザ・英語表示。
+- `stories/NumberField.stories.jsx`：数値入力の通常・空欄・範囲外・小数・英語表示。
+- `stories/Documentation.stories.jsx`：コードのコピー、長いコード、表、数式と狭い幅での表示。
+
+これらは実際の部品を読み込みます。接続パネルの `InstrumentProvider` だけは `.storybook/main.ts` のViteプラグインで `stories/InstrumentMock.jsx` に置き換えます。この置き換えはStorybook内だけに適用され、Next.js側の通信処理には影響しません。Storybookのラッパーや模擬処理はライブラリの公開APIではありません。
+
+### コードのシンタックスハイライト
+
+`components/CodeBlock.tsx` はServer Componentです。`lib/highlight-code.js` がShikiで色付けし、`CodeBlockClient.tsx` が表示とコピーを担当します。テーマは `github-light`。未指定・未対応言語はプレーンテキストで表示します。ドキュメントの閲覧用JavaScriptにはShikiを含めません。Storybookでは同じ色付け関数をloaderから呼びます。

@@ -34,6 +34,7 @@ await writeFile(path.join(out, ".nojekyll"), "");
 await writeLegacyRedirects(out);
 
 // Storybookも同じサイトのサブディレクトリで配信します。
+await rm(path.join(out, "storybook"), { recursive: true, force: true });
 await cp(path.join(website, "storybook-static"), path.join(out, "storybook"), { recursive: true });
 
 // 完成したHTMLを索引にします。本文は別管理せず、各page.tsxを編集するだけです。

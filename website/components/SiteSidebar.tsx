@@ -80,6 +80,7 @@ export default function SiteSidebar({ locale = "ja" }: { locale?: Locale }) {
           </li>
           <li><Link href={`${prefix}/reference/analysis`} {...currentPage(`${prefix}/reference/analysis`)}>{text.analysisSpec}</Link></li>
           <li><Link href={`${prefix}/guide/browsers`} {...currentPage(`${prefix}/guide/browsers`)}>{text.browsersTroubleshooting}</Link></li>
+          <li><a href={sitePath("/storybook/?path=/docs/graphs--docs")} target="_blank" rel="noopener noreferrer">{text.componentPreview} ↗</a></li>
           <li className="menu-title mt-4">{text.remote}</li>
           <li><Link href={`${prefix}/guide/remote`} {...currentPage(`${prefix}/guide/remote`)}>{text.remoteStart}</Link></li>
           <li><Link href={`${prefix}/guide/remote-admin`} {...currentPage(`${prefix}/guide/remote-admin`)}>{text.admin}</Link></li>
