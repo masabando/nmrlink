@@ -57,3 +57,25 @@ npm run check
 ```
 
 `check` は出力内のリンク・モジュール参照・転送先と見出し・検索索引を検査し、非公開設定やサーバーのソースが混入していないか確認します。実機用の最小サンプル・従来版Web UI・Python原本は、旧マニュアルとは別に残しています。
+
+## グラフのStorybook
+
+ライブラリのグラフAPIを、実機なしで確認する開発用カタログです。リポジトリのルートで実行します。
+
+```bash
+npm run storybook
+```
+
+`http://localhost:6006/` を開きます。同じLANの端末からは、このPCのホスト名とポート6006でアクセスできます。
+
+- `stories/Graphs.stories.jsx`：表示例とControlsの定義。
+- `stories/GraphPreview.jsx`：模擬データを作り、ライブラリの公開APIを呼ぶ表示アダプター。
+- `.storybook/`：Storybook専用の設定。React + Viteを使い、Next.jsのルーターには依存しません。
+
+FID・FFT、周波数調整、パルス校正、T1・T2を収録しています。Controlsでグラフ種別・通常／ノイズ／ゼロ信号・日英・表示幅を変更できます。FID・FFTでは線色も変更できます。ノイズは固定値なので再表示しても変わりません。ゼロ信号には近似線を付けません。通信や実機動作の検証は行いません。
+
+```bash
+npm run storybook:build
+```
+
+静的出力は `website/storybook-static/` です。Git対象外です。`npm run docs:build` ではStorybookもビルドし、`website/out/storybook/` に同梱します。公開URLは `/nmrlink/storybook/` です。ライブラリの配布内容やAPIも変更しません。

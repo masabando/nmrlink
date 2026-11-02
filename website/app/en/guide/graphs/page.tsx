@@ -4,6 +4,7 @@ import Link from "next/link";
 import CodeBlock from "@/components/CodeBlock";
 import AnalysisPreview from "@/components/AnalysisPreview";
 import CurvePreview from "@/components/CurvePreview";
+import { sitePath } from "@/lib/site-path";
 import { curveHTML } from "@/examples/graph-curves";
 
 export const metadata: Metadata = { title: "Display graphs" };
@@ -13,6 +14,7 @@ export default function GraphsPage() {
     <DocumentationArticle locale="en">
       <h1>Display graphs</h1>
       <p>Use NMRGraphs for FID and FFT, and SVG functions for frequency sweeps, pulse calibration, T1 and T2. All previews below use simulated data without connecting to hardware.</p>
+      <p><a href={sitePath("/storybook/?path=/docs/graphs--docs")} target="_blank" rel="noopener noreferrer">Try the graphs in Storybook ↗</a>. Change the language, width, signal conditions and FID/FFT colors without hardware. Storybook’s code examples use a preview-only React adapter; use the code on this page when building your own UI.</p>
       <h2>FID and FFT</h2>
       <AnalysisPreview locale="en" fftColor="#7c3aed" />
       <p>The preview uses the same library as the example below. Replace the graph constructor in <Link href="/en/guide/first">Your first Web UI</Link> with the following settings; keep the imports and result handler.</p>

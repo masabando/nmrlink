@@ -18,7 +18,9 @@
     "test:docs": "npm --prefix website test",
     "test:standard": "node --test tests/standard/*.test.js",
     "test:package": "node scripts/test-package.js",
-    "docs:dev": "npm --prefix website run dev"
+    "docs:dev": "npm --prefix website run dev",
+    "storybook": "npm --prefix website run storybook",
+    "storybook:build": "npm --prefix website run build-storybook"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",

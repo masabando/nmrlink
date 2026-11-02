@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/build-site.mjs",
+    "build": "next build && npm run build-storybook && node scripts/build-site.mjs",
     "start": "node scripts/serve.mjs",
     "lint": "eslint",
     "predev": "node scripts/prepare-dev.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node scripts/check-site.mjs"
+    "check": "node scripts/check-site.mjs",
+    "storybook": "storybook dev -p 6006 --host 0.0.0.0 --no-open",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "katex": "^0.19.1",
@@ -19,7 +21,10 @@
     "three": "^0.180.0"
   },
   "devDependencies": {
+    "@storybook/addon-docs": "^10.6.5",
+    "@storybook/react-vite": "^10.6.5",
     "@tailwindcss/turbopack": "^4",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -27,8 +32,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "pagefind": "^1.5.2",
+    "storybook": "^10.6.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.5"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true

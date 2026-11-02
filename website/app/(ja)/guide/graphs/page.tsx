@@ -4,6 +4,7 @@ import Link from "next/link";
 import CodeBlock from "@/components/CodeBlock";
 import AnalysisPreview from "@/components/AnalysisPreview";
 import CurvePreview from "@/components/CurvePreview";
+import { sitePath } from "@/lib/site-path";
 import { curveHTML } from "@/examples/graph-curves";
 
 export const metadata: Metadata = { title: "グラフを表示する" };
@@ -13,6 +14,7 @@ export default function GraphsPage() {
     <DocumentationArticle>
       <h1>グラフを表示する</h1>
       <p>FID・FFTはNMRGraphs、周波数調整・パルス校正・T1・T2はSVGを返す関数で表示します。このページの表示例はすべて模擬データで、実機には接続しません。</p>
+      <p><a href={sitePath("/storybook/?path=/docs/graphs--docs")} target="_blank" rel="noopener noreferrer">Storybookで表示を試す ↗</a>：実機なしで言語・幅・信号の状態・FIDとFFTの線色を変更できます。Storybookのコード例は表示確認専用のReactアダプターを使っています。自作UIには、このページのコードを使ってください。</p>
       <h2>FIDとFFT</h2>
       <AnalysisPreview locale="ja" fftColor="#7c3aed" />
       <p>上の表示例も、下のコードと同じライブラリを使っています。<Link href="/guide/first">最初のWeb UI</Link>のグラフ作成部分を、次で置き換えてください。importと結果を受け取る処理はそのまま使います。</p>
