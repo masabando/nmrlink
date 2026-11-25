@@ -18,6 +18,7 @@ export default function ReferencePage() {
         ["peak / status", "null", "Peak / analysis description text elements"],
         ["displayEndMs", "10", "FID display end [ms]"],
         ["frequencyLimitHz", "10000", "FFT ±display limit [Hz]; axis uses kHz"],
+        ["fftSeries", "null", "FFT comparison traces; null uses analysis only"],
         ["colors", "{}", "CSS colors for data1, data2 and fft"],
         ["locale / labels", "ja / {}", "Language / partial text overrides"],
       ]} />
@@ -28,6 +29,23 @@ graphs.show(record, analyzeMeasurement(record));
       <p>If evaluation of the analysis argument fails, the previous view remains. A rendering failure inside show clears the view and throws. Complete validation and analysis before passing the result to show.</p>
       <h2 id="createrecordplots">createRecordPlots(record, options)</h2>
       <p>Returns <code>{"{ fid, fft, spectrum, peak }"}</code> without a DOM; fid and fft are SVG strings. Options include width=720 (minimum 160), plus the same displayEndMs, frequencyLimitHz, colors, locale and labels as NMRGraphs. analysis defaults to the standard analysis; idPrefix is generated automatically. Manual prefixes must be unique within a page.</p>
+      <p>Both APIs accept fftSeries for FFT overlays. Each entry contains an analyzed spectrum, color, label and optional hidden flag. Hidden traces remain included in vertical-axis scaling. FID and peak still use the supplied analysis.</p>
+      <CodeBlock language="js" code={`import { analyzeMeasurement } from "nmrlink";
+import { createRecordPlots } from "nmrlink/graphs";
+
+const cutoffs = [null, 1000, 500, 200, 100];
+const colors = ["#176caa", "#b34e25", "#278047", "#8654ad", "#a57608"];
+const analysis = analyzeMeasurement(record);
+const fftSeries = cutoffs.map((lowpassHz, i) => ({
+  spectrum: analyzeMeasurement(record, { lowpassHz }).spectrum,
+  color: colors[i],
+  label: lowpassHz === null ? "None" : lowpassHz + " Hz",
+  hidden: lowpassHz !== null,
+}));
+const plots = createRecordPlots(record, { analysis, fftSeries });
+// Toggle a trace, then rebuild the SVG. No new measurement is needed.
+fftSeries[1].hidden = false;
+const comparison = createRecordPlots(record, { analysis, fftSeries });`} />
       <h2 id="curves">Response curve SVGs</h2>
       <ReferenceTable headings={["Function", "Required point fields", "Additional options and axis"]} rows={[
         ["createFrequencyPlot(points, options)", "frequencyHz, nonnegative amplitude", "Set frequency [kHz]"],

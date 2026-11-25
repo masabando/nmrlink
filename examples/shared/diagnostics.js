@@ -19,6 +19,7 @@ const japanese = Object.freeze({
   "INVALID_PNG_SCALE": "PNGの倍率は0より大きく4以下にしてください。",
   "INVALID_PNG_DIMENSIONS": "PNGのサイズは各辺8192ピクセル以下、合計1600万ピクセル以下にしてください。",
   "INVALID_FFT_RANGE": "FFT範囲は0以上で、開始より終了を大きくし、収録時間内にしてください。",
+  "INVALID_LOWPASS": "LPFのカットオフ周波数を0より大きくナイキスト周波数未満にし、4点以上のデータを指定してください。",
   "INVALID_WINDOW": "窓関数はHannまたは矩形窓を選んでください。",
   "INSUFFICIENT_FFT_SAMPLES": "FFTの範囲に4点以上含めてください。",
   "INVALID_BASELINE_TAIL": "末尾点数は1以上、データ点数以下の整数にしてください。",

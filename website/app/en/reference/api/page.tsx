@@ -14,7 +14,7 @@ export default function ReferencePage() {
       <h2>Browse by feature</h2>
       <ul>
         <li><Link href="/en/reference/api/measurement">Connection and measurement</Link>: NMRController, NMRDevice, parameters, records and timing</li>
-        <li><Link href="/en/reference/api/analysis">Signal analysis</Link>: analyzeMeasurement, correctBaseline and computeSpectrum</li>
+        <li><Link href="/en/reference/api/analysis">Signal analysis</Link>: analyzeMeasurement, correctBaseline, lowpassFilter and computeSpectrum</li>
         <li><Link href="/en/reference/api/graphs">Graphs</Link>: NMRGraphs, SVG generation, languages, labels and colors</li>
         <li><Link href="/en/reference/api/files">Save and load</Link>: JSON, PNG, timestamps and scan archives</li>
         <li><Link href="/en/reference/api/sweeps">Frequency and pulse scans</Link>: planning, cancellation, common phase and sine fits</li>
@@ -56,6 +56,7 @@ try {
       <ReferenceTable headings={["Example code", "Meaning / details"]} rows={[
         ["INVALID_PARAMETER_RANGE", "Parameter out of range; name, minimum, maximum"],
         ["INVALID_FFT_RANGE / INSUFFICIENT_FFT_SAMPLES", "Invalid FFT interval / too few samples"],
+        ["INVALID_LOWPASS", "Invalid LPF cutoff or sampling interval / too few samples"],
         ["INVALID_JSON / RECORD_TOO_LARGE", "Malformed JSON / measurement JSON too large"],
         ["NO_REFERENCE_SIGNAL", "No usable common reference signal"],
         ["DEVICE_NOT_CONNECTED / DEVICE_BUSY", "Disconnected / another operation is running"],

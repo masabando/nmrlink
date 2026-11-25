@@ -18,6 +18,7 @@ export default function ReferencePage() {
         ["peak / status", "null", "最大ピーク / 解析条件のテキスト要素"],
         ["displayEndMs", "10", "FID表示の終了時刻 [ms]"],
         ["frequencyLimitHz", "10000", "FFT表示の±範囲 [Hz]。軸はkHz"],
+        ["fftSeries", "null", "FFT比較線の配列。省略時はanalysisの1本"],
         ["colors", "{}", "data1・data2・fftのCSS色"],
         ["locale / labels", "ja / {}", "表示言語 / 文字列の部分上書き"],
       ]} />
@@ -28,6 +29,23 @@ graphs.show(record, analyzeMeasurement(record));
       <p>解析引数の計算が失敗した場合は直前の表示を保持しますが、show内部の描画失敗は表示をclearして例外を投げます。入力の検証・解析を先に完了してからshowへ渡してください。</p>
       <h2 id="createrecordplots">createRecordPlots(record, options)</h2>
       <p>DOMを使わず<code>{"{ fid, fft, spectrum, peak }"}</code>を返します。fid・fftはSVG文字列です。width=720（160以上）と、NMRGraphsと同じdisplayEndMs・frequencyLimitHz・colors・locale・labelsを受け取ります。analysisは既定解析、idPrefixは自動生成です。手動のidPrefixを同じページ内で重複させないでください。</p>
+      <p>FFTの重ね描きには、両APIのオプションにfftSeriesを渡します。各要素は解析済みのspectrum、線色color、表示名label、任意のhiddenを持ちます。hidden=trueの線も縦軸計算に含め、表示を切り替えても共通の振幅スケールを維持します。FIDとpeakはanalysisの結果を使います。</p>
+      <CodeBlock language="js" code={`import { analyzeMeasurement } from "nmrlink";
+import { createRecordPlots } from "nmrlink/graphs";
+
+const cutoffs = [null, 1000, 500, 200, 100];
+const colors = ["#176caa", "#b34e25", "#278047", "#8654ad", "#a57608"];
+const analysis = analyzeMeasurement(record);
+const fftSeries = cutoffs.map((lowpassHz, i) => ({
+  spectrum: analyzeMeasurement(record, { lowpassHz }).spectrum,
+  color: colors[i],
+  label: lowpassHz === null ? "None" : lowpassHz + " Hz",
+  hidden: lowpassHz !== null,
+}));
+const plots = createRecordPlots(record, { analysis, fftSeries });
+// Toggle a trace, then rebuild the SVG. No new measurement is needed.
+fftSeries[1].hidden = false;
+const comparison = createRecordPlots(record, { analysis, fftSeries });`} />
       <h2 id="curves">走査曲線のSVG</h2>
       <ReferenceTable headings={["関数", "必要な点の値", "追加optionと横軸"]} rows={[
         ["createFrequencyPlot(points, options)", "frequencyHz、非負のamplitude", "設定周波数 [kHz]"],

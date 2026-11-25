@@ -18,7 +18,7 @@ function lineColors(options = {}) {
 const escapeAttribute = value => value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
 /** Build a responsive SVG. All plotted values come from validated numeric data. */
-function plot(series, { title, xLabel, yLabel, xMinimum, xMaximum, nonnegative = false, scaleFrom = xMinimum, scaleUntil = xMaximum, clipId, width = 720, selection, colors, markers = false, xFormatter = null }) {
+function plot(series, { title, xLabel, yLabel, xMinimum, xMaximum, nonnegative = false, scaleFrom = xMinimum, scaleUntil = xMaximum, clipId, width = 720, selection, colors, markers = false, xFormatter = null, annotation = null, hiddenSeries = [] }) {
   const height = 280;
   const margin = { left: 68, right: 20, top: 20, bottom: 52 };
   const plotWidth = width - margin.left - margin.right;
@@ -36,6 +36,7 @@ function plot(series, { title, xLabel, yLabel, xMinimum, xMaximum, nonnegative =
   const yPosition = value => margin.top + (yMaximum - value) / (yMaximum - yMinimum) * plotHeight;
   const format = value => Math.abs(value) >= 10000 ? value.toExponential(1) : Number(value.toPrecision(4)).toString();
   const elements = [];
+  if (annotation) elements.push(`<text x="${margin.left}" y="12" style="font-size:10px">${escapeAttribute(annotation)}</text>`);
 
   for (let tick = 0; tick <= 4; tick++) {
     const x = xMinimum + (xMaximum - xMinimum) * tick / 4;
@@ -53,6 +54,7 @@ function plot(series, { title, xLabel, yLabel, xMinimum, xMaximum, nonnegative =
     elements.push(`<g clip-path="url(#${clipId})"><rect x="${left}" y="${margin.top}" width="${right - left}" height="${plotHeight}" fill="#176caa" fill-opacity="0.1"/><path d="M ${left} ${margin.top} V ${margin.top + plotHeight} M ${right} ${margin.top} V ${margin.top + plotHeight}" stroke="#176caa" stroke-dasharray="4 3"/></g>`);
   }
   series.forEach((points, index) => {
+    if (hiddenSeries?.[index]) return;
     const coordinates = points.map(([x, y]) => `${xPosition(x).toFixed(2)},${yPosition(y).toFixed(2)}`).join(" ");
     elements.push(`<polyline points="${coordinates}" fill="none" stroke="${escapeAttribute(colors[index])}" stroke-width="1.5" stroke-linejoin="round" clip-path="url(#${clipId})"/>`);
     if (markers && index === 0) for (const [x, y] of points) {
@@ -65,23 +67,25 @@ function plot(series, { title, xLabel, yLabel, xMinimum, xMaximum, nonnegative =
 }
 
 /** Analyze without modifying record.raw; share the same pipeline in browser/tests. */
-export function createRecordPlots(record, { width = 720, displayEndMs = 10, frequencyLimitHz = 10000, analysis = analyzeMeasurement(record), idPrefix = `nmr-${++nextGraphId}`, colors = {}, locale = "ja", labels = {} } = {}) {
+export function createRecordPlots(record, { width = 720, displayEndMs = 10, frequencyLimitHz = 10000, analysis = analyzeMeasurement(record), idPrefix = `nmr-${++nextGraphId}`, colors = {}, locale = "ja", labels = {}, fftSeries = null } = {}) {
   if (!Number.isFinite(width) || width < 160) throw createError(RangeError, "INVALID_PLOT_WIDTH");
   if (typeof idPrefix !== "string" || !/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(idPrefix)) throw createError(TypeError, "INVALID_SVG_PREFIX");
   if (!Number.isFinite(displayEndMs) || displayEndMs <= 0 || !Number.isFinite(frequencyLimitHz) || frequencyLimitHz <= 0) throw createError(RangeError, "INVALID_DISPLAY_LIMITS");
   const palette = lineColors(colors);
   const text = resolveRecordLabels(locale, labels);
   const { data, spectrum, peak } = analysis;
+  const annotation = analysis.lowpass ? `LPF ${analysis.lowpass.cutoffHz} Hz (−3 dB), t ≥ ${analysis.lowpass.startMs} ms` : null;
   const endMs = Math.min(displayEndMs, data.length * record.sampleIntervalMs);
   const displayed = data.slice(0, Math.ceil(endMs / record.sampleIntervalMs - 1e-9));
   const channels = [0, 1].map(channel => displayed.map((pair, index) => [index * record.sampleIntervalMs, pair[channel]]));
   const visibleBins = spectrum.bins.filter(bin => Math.abs(bin.hz) <= frequencyLimitHz);
   const displayLimit = Math.min(frequencyLimitHz, 500 / record.sampleIntervalMs);
   return {
-    fid: plot(channels, { ...text.fid, xMinimum: 0, xMaximum: endMs, scaleFrom: spectrum.actualStartMs, scaleUntil: spectrum.actualEndExclusiveMs, clipId: `${idPrefix}-fid`, width, selection: [spectrum.actualStartMs, spectrum.actualEndExclusiveMs], colors: [palette.data1, palette.data2] }),
-    fft: plot([visibleBins.map(bin => [bin.hz / 1000, bin.amplitude])], {
-      ...text.fft,
-      xMinimum: -displayLimit / 1000, xMaximum: displayLimit / 1000, nonnegative: true, clipId: `${idPrefix}-fft`, width, colors: [palette.fft],
+    fid: plot(channels, { ...text.fid, annotation, xMinimum: 0, xMaximum: endMs, scaleFrom: spectrum.actualStartMs, scaleUntil: spectrum.actualEndExclusiveMs, clipId: `${idPrefix}-fid`, width, selection: [spectrum.actualStartMs, spectrum.actualEndExclusiveMs], colors: [palette.data1, palette.data2] }),
+    fft: plot(fftSeries ? fftSeries.map(line => line.spectrum.bins.filter(bin => Math.abs(bin.hz) <= frequencyLimitHz).map(bin => [bin.hz / 1000, bin.amplitude])) : [visibleBins.map(bin => [bin.hz / 1000, bin.amplitude])], {
+      ...text.fft, annotation: fftSeries ? fftSeries.filter(line => !line.hidden).map(line => line.label).join(" / ") : annotation,
+      hiddenSeries: fftSeries?.map(line => line.hidden),
+      xMinimum: -displayLimit / 1000, xMaximum: displayLimit / 1000, nonnegative: true, clipId: `${idPrefix}-fft`, width, colors: fftSeries ? fftSeries.map(line => line.color) : [palette.fft],
     }),
     peak,
     spectrum,
@@ -90,9 +94,10 @@ export function createRecordPlots(record, { width = 720, displayEndMs = 10, freq
 
 /** Browser graph view. Resize redraws the saved analysis, without remeasuring. */
 export class NMRGraphs {
-  constructor({ fid, fft, peak = null, status = null, displayEndMs = 10, frequencyLimitHz = 10000, colors = {}, locale = "ja", labels = {} }) {
+  constructor({ fid, fft, peak = null, status = null, displayEndMs = 10, frequencyLimitHz = 10000, colors = {}, locale = "ja", labels = {}, fftSeries = null }) {
     if (!fid || !fft) throw createError(TypeError, "GRAPH_ELEMENTS_REQUIRED");
     Object.assign(this, { fid, fft, peakElement: peak, statusElement: status, displayEndMs, frequencyLimitHz });
+    this.fftSeries = fftSeries;
     this.colors = lineColors(colors);
     this.labels = resolveRecordLabels(locale, labels);
     this.locale = locale;
@@ -125,7 +130,7 @@ export class NMRGraphs {
       const style = getComputedStyle(element);
       return Math.max(160, element.clientWidth - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0));
     };
-    const options = { analysis, displayEndMs: this.displayEndMs, frequencyLimitHz: this.frequencyLimitHz, idPrefix: this.idPrefix, colors: this.colors, locale: this.locale, labels: this.labels };
+    const options = { fftSeries: this.fftSeries, analysis, displayEndMs: this.displayEndMs, frequencyLimitHz: this.frequencyLimitHz, idPrefix: this.idPrefix, colors: this.colors, locale: this.locale, labels: this.labels };
     const fid = createRecordPlots(record, { ...options, width: widthOf(this.fid) });
     const fft = createRecordPlots(record, { ...options, width: widthOf(this.fft) });
     this.fid.innerHTML = fid.fid;

@@ -138,6 +138,16 @@ nmrlink/graphs also exports createRecordPlots, createFrequencyPlot, createPulseP
 
 nmrlink/browser provides saveMeasurement(record), readMeasurement(file), saveGraphPng(svg, { filename, scale }), and formatFileTimestamp(acquiredAt). Saved filenames use JST while acquiredAt remains UTC. Reading saved JSON permits reanalysis without contacting the apparatus.
 
+### Optional low-pass filtering and FFT comparison
+
+`analyzeMeasurement(record, { lowpassHz: 500 })` applies a second-order Butterworth filter forward and backward after baseline correction. The specified cutoff is the final -3 dB frequency. Filtering runs from the FFT start through the acquisition end; earlier waveform samples remain unfiltered. Omitted or null lowpassHz preserves the original results. Raw samples are unchanged; data and spectrum include filtering, baseline.data does not. Optional lowpass metadata contains cutoffHz, startMs, method, paddingSamples and the filtered segment data.
+
+`lowpassFilter(data, { sampleIntervalMs, cutoffHz })`, exported from nmrlink, filters the entire supplied two-channel array and returns new data and metadata. Both channels use identical coefficients. It requires at least four samples, a positive finite sampling interval and 0 < cutoffHz < Nyquist. Invalid settings use INVALID_LOWPASS. Endpoint effects remain, and narrow filtering can attenuate resonance; tune the receiver reference close to resonance first.
+
+NMRGraphs and createRecordPlots accept optional fftSeries: an array of { spectrum, color, label, hidden? }. Each spectrum is an analyzed spectrum. Hidden traces still contribute to the shared vertical scale. FID and peak continue to use analysis. To change visibility in NMRGraphs, dispose and recreate the view with the updated options, then call show; for createRecordPlots, regenerate the SVG.
+
+The standard Web UI computes None/1000/500/200/100 Hz spectra using shared analysis settings. Initially only None is visible; legend checkboxes control comparison traces independently. The analysis-panel LPF controls FID, maximum peak and CSV after Reanalyze. FFT SVG/PNG exports contain visible comparison traces. JSON raw samples remain unfiltered; optional analysisSettings restores applied standard-UI analysis settings on import.
+
 ## Calibration and relaxation
 
 The root module exports frequency/pulse/T1/T2 sweep helpers, fitting functions and archive parsers. Consult the API reference and existing standard UI before implementing sweeps; reuse these helpers instead of duplicating serial commands or fit algorithms.

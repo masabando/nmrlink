@@ -25,12 +25,19 @@
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",
     "esbuild": "^0.28.2",
-    "firebase": "^13.0.0",
-    "firebase-tools": "^15.34.0"
+    "firebase": "^13.4.0",
+    "firebase-tools": "^15.37.0"
   },
   "engines": {
     "node": ">=22"
   },
   "license": "MIT",
-  "version": "0.2.0"
+  "version": "0.3.0",
+  "allowScripts": {
+    "@firebase/util@1.15.3": true,
+    "@serialport/bindings-cpp@13.0.0": true,
+    "esbuild@0.28.2": true,
+    "protobufjs@7.6.6": true,
+    "re2@1.27.0": true
+  }
 }

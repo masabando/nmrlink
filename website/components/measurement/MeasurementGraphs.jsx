@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NMRGraphs } from "../../../packages/nmrlink/src/graphs.js";
 import { saveGraphPng } from "../../../packages/nmrlink/src/browser.js";
 import { download } from "./model";
@@ -18,6 +18,7 @@ export default function MeasurementGraphs({
     peak = useRef(null),
     status = useRef(null);
   const text = messages[locale];
+  const [hidden, setHidden] = useState(["1000", "500", "200", "100"]);
   useEffect(() => {
     if (!prepared) {
       fid.current.textContent = text.empty;
@@ -31,12 +32,17 @@ export default function MeasurementGraphs({
       peak: peak.current,
       status: status.current,
       locale,
+      fftSeries: prepared.comparison?.map(line => ({
+        ...line,
+        label: line.key === "none" ? text.lowpassNone : `${line.key} Hz`,
+        hidden: hidden.includes(line.key),
+      })),
       displayEndMs: prepared.displayEndMs,
       frequencyLimitHz: prepared.frequencyLimitHz,
     });
     graphs.show(prepared.record, prepared.analysis);
     return () => graphs.dispose();
-  }, [prepared, locale, text.empty]);
+  }, [prepared, locale, text.empty, text.lowpassNone, hidden]);
 
   async function save(kind, format) {
     const svg = (kind === "fid" ? fid : fft).current.querySelector("svg");
@@ -101,8 +107,20 @@ export default function MeasurementGraphs({
               ))}
             </div>
           </div>
+          {prepared?.comparison && <>
+            <div className="flex flex-wrap gap-x-5 gap-y-3" role="group" aria-label={text.lowpassComparison}>
+              {prepared.comparison.map(line => <label key={line.key} className="flex cursor-pointer items-center gap-2 text-sm">
+                <input type="checkbox" className="checkbox checkbox-sm" checked={!hidden.includes(line.key)}
+                  onChange={() => setHidden(current => current.includes(line.key) ? current.filter(key => key !== line.key) : [...current, line.key])} />
+                <span aria-hidden="true" style={{ color: line.color }}>━</span>
+                {line.key === "none" ? text.lowpassNone : `${line.key} Hz`}
+              </label>)}
+            </div>
+            <p className="text-xs text-base-content/70">{text.lowpassComparisonHint}</p>
+          </>}
           <p ref={peak} className="text-sm" />
           <div ref={fft} className="min-h-[280px] min-w-0"></div>
+          {prepared?.settings && <p className="text-xs text-base-content/70">{text.lowpassApplied}：{prepared.analysis.lowpass ? `${prepared.analysis.lowpass.cutoffHz} Hz (−3 dB), t ≥ ${prepared.analysis.lowpass.startMs} ms` : text.lowpassNone}</p>}
           <p
             ref={status}
             className="text-xs leading-relaxed text-base-content/70"

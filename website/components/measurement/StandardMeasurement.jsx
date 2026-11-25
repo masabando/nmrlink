@@ -122,6 +122,16 @@ export default function StandardMeasurement() {
     setNotice({ key: "loading" });
     try {
       const loaded = await readMeasurement(file);
+      const savedSettings = JSON.parse(await file.text()).analysisSettings;
+      if (savedSettings !== undefined) {
+        if (!savedSettings || typeof savedSettings !== "object" || Array.isArray(savedSettings)) throw new Error("Invalid analysis settings.");
+        const restored = Object.fromEntries(Object.keys(initialAnalysis).map(key => [key, savedSettings[key] ?? initialAnalysis[key]]));
+        if (Object.values(restored).some(value => typeof value !== "string" || value.trim() === "")) throw new Error("Invalid analysis settings.");
+        prepare(loaded, restored);
+        if (!alive.current) return;
+        settingsRef.current = restored;
+        setSettings(restored);
+      }
       if (!alive.current) return;
       setRecord({ value: loaded, fromFile: true });
       setNotice({ key: "loaded", filename: file.name });
@@ -136,7 +146,7 @@ export default function StandardMeasurement() {
   function save(kind) {
     if (!value) return;
     try {
-      if (kind === "json") saveMeasurement(value);
+      if (kind === "json") saveMeasurement({ ...value, ...(prepared?.record === value ? { analysisSettings: prepared.settings } : {}) });
       else if (prepared)
         download(
           kind === "fid"
@@ -385,6 +395,13 @@ export default function StandardMeasurement() {
                       step={0.02}
                     />
                     <label className="fieldset gap-2">
+                      <span>{text.lowpass}</span>
+                      <select className="select w-full" value={settings.lowpassHz ?? "none"} onChange={event => updateSetting("lowpassHz", event.target.value)}>
+                        <option value="none">{text.lowpassNone}</option>
+                        {[1000, 500, 200, 100].map(hz => <option key={hz} value={String(hz)}>{hz} Hz</option>)}
+                      </select>
+                    </label>
+                    <label className="fieldset gap-2">
                       <span>{text.window}</span>
                       <select
                         className="select w-full"
@@ -425,6 +442,7 @@ export default function StandardMeasurement() {
                     />
                   </div>
                 </form>
+                <p className="text-xs text-base-content/70">{text.lowpassHint}</p>
                 <p className="text-xs text-base-content/70">
                   {spectrum
                     ? `${spectrum.count} ${text.count} · FFT ${spectrum.size} · ${text.resolution} ${spectrum.resolutionHz.toFixed(1)} Hz · ${text.spacing} ${spectrum.spacingHz.toFixed(1)} Hz`
@@ -460,6 +478,7 @@ export default function StandardMeasurement() {
                 </button>
               </div>
               <p className="text-xs text-base-content/70">{text.saveHint}</p>
+              <p className="text-xs text-base-content/70">{text.lowpassRaw}</p>
             </div>
           </section>
         </div>

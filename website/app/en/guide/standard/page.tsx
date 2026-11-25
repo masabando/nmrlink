@@ -32,6 +32,8 @@ export default function WebUIGuidePage() {
         <li>Save the data you need and click Disconnect (切断).</li>
       </ol>
       <p>Immediate stopping is not supported; disconnect is not a stop command. Finish the current operation before switching pages. Measurement, Frequency tuning, Pulse calibration, T1 measurement and T2 measurement share the connection, inputs and results.</p>
+      <p>Select None, 1000, 500, 200 or 100 Hz under LPF for FID, peak and CSV, then click Reanalyze to compare the same raw record. After baseline correction, filtering runs from the FFT start to the acquisition end; earlier samples remain unfiltered. The cutoff is the final −3 dB point of a second-order Butterworth filter applied forward and backward. Endpoint effects remain near the start and end. Narrow filters also attenuate signals, so tune the reference close to resonance first. The peak is measured after filtering and may select residual noise if the signal is attenuated. This control is available only in standard measurement and defaults to None.</p>
+      <p>The FFT initially shows only None. You can overlay all five LPF patterns. Check or uncheck each legend item to show or hide its trace. All traces share analysis settings and a fixed amplitude scale. FID, maximum peak and CSV use the selected LPF. FFT SVG and PNG exports contain the visible traces.</p>
       <h2 id="results">Read the results</h2>
       <p>Blue and orange FID traces are the two baseline-corrected channels. The shaded band marks the FFT interval; this interval determines the vertical scale. Large early transients may be clipped. Baseline correction uses the last 100 samples by default.</p>
       <p>The FFT axis shows the receiver-relative offset in kHz. The maximum peak is selected from all FFT bins, so it can lie outside the visible range. Distinguish the peak readout in Hz from the axis in kHz.</p>
@@ -45,6 +47,7 @@ export default function WebUIGuidePage() {
       <p>Open JSON (JSONを開く) loads one measurement record for offline reanalysis: NMRLink JSON with 2048 samples at 0.02 ms spacing, at most 2 MiB. CSV, images, full-scan JSON and Python-specific formats are not accepted.</p>
       <p>Reading is local without uploads or device commands. Imported settings are shown with the result without changing the measurement form. Invalid files retain the current record; importing is disabled during measurement.</p>
       <p>Filenames use Japan time. Save before closing the page: data is retained while switching measurement pages, but not after a reload or closing the page. A new measurement, demo or successful import replaces the displayed record.</p>
+      <p>JSON raw samples remain unfiltered. Applied settings are saved as analysisSettings and restored on import. Filtered CSV includes the cutoff and filter start; FID SVG and PNG show the applied LPF; FFT SVG and PNG contain the comparison traces enabled in the legend. Reanalyze with None to return to the original analysis.</p>
       <h2 id="demo">Try without hardware</h2>
       <p>Click Show simulated FID (模擬FIDを表示) to try graphs, analysis and downloads. DEMO / demo identifies simulated results on screen and in saved data. No device command is sent; this does not reproduce or validate hardware accuracy.</p>
       <h2 id="next">Continue with tuning and measurements</h2>

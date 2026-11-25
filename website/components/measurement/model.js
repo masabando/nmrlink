@@ -3,10 +3,9 @@ import {
   measurementDurationMs,
 } from "../../../packages/nmrlink/src/index.js";
 import { formatFileTimestamp } from "../../../packages/nmrlink/src/browser.js";
+import { fidCsv as originalFidCsv, fftCsv as originalFftCsv } from "../../../examples/standard/model.js";
 export {
   createDemoRecord,
-  fidCsv,
-  fftCsv,
 } from "../../../examples/standard/model.js";
 
 export const initialParameters = {
@@ -26,6 +25,7 @@ export const initialAnalysis = {
   tailPoints: "100",
   displayEndMs: "10",
   frequencyLimitKHz: "10",
+  lowpassHz: "none",
 };
 export function numericParameters(fields) {
   if (
@@ -60,13 +60,29 @@ export function prepare(record, fields) {
     error.code = "UI_DISPLAY_RANGE";
     throw error;
   }
+  const lowpassHz = fields.lowpassHz ?? "none";
+  if (!["none", "1000", "500", "200", "100"].includes(lowpassHz)) {
+    const error = new RangeError("Choose a supported low-pass cutoff.");
+    error.code = "INVALID_LOWPASS";
+    throw error;
+  }
   const analysis = analyzeMeasurement(record, {
     startMs: Number(fields.startMs),
     endMs: Number(fields.endMs),
     tailPoints: Number(fields.tailPoints),
     window: fields.window,
+    lowpassHz: lowpassHz === "none" ? null : Number(lowpassHz),
   });
-  return { record, analysis, displayEndMs, frequencyLimitHz };
+  const comparison = ["none", "1000", "500", "200", "100"].map((cutoff, index) => ({
+    key: cutoff,
+    color: ["#176caa", "#b34e25", "#278047", "#8654ad", "#a57608"][index],
+    spectrum: cutoff === lowpassHz ? analysis.spectrum : analyzeMeasurement(record, {
+      startMs: Number(fields.startMs), endMs: Number(fields.endMs),
+      tailPoints: Number(fields.tailPoints), window: fields.window,
+      lowpassHz: cutoff === "none" ? null : Number(cutoff),
+    }).spectrum,
+  }));
+  return { record, analysis, comparison, displayEndMs, frequencyLimitHz, settings: { ...fields, lowpassHz } };
 }
 
 // CSV/SVGは測定時刻のJSTファイル名を使います。PNGには同じ名前だけ渡します。
@@ -86,3 +102,12 @@ export function download(
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   return filename;
 }
+
+// Filter metadata travels with analyzed CSV values; raw channel columns are unchanged.
+function withLowpass(csv, analysis) {
+  if (!analysis.lowpass) return csv;
+  const rows = csv.trimEnd().split("\n");
+  return rows.map((row, i) => `${i === 0 ? "lowpass_cutoff_hz,lowpass_start_ms" : `${analysis.lowpass.cutoffHz},${analysis.lowpass.startMs}`},${row}`).join("\n") + "\n";
+}
+export const fidCsv = (record, analysis) => withLowpass(originalFidCsv(record, analysis), analysis);
+export const fftCsv = (record, analysis) => withLowpass(originalFftCsv(record, analysis), analysis);

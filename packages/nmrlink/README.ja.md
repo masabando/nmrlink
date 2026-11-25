@@ -159,3 +159,9 @@ try {
 ```
 
 `analyzePulseCalibration`・`analyzeT1`・`analyzeT2` は `warnings` の文字列配列を維持し、文は英語で返します。追加の `warningDetails` は同じ順序の `{ code, message, details }` 配列です。警告の翻訳にもコードを使います。グラフの `locale` はエラー・警告を翻訳しません。[エラーコードと警告の説明](https://masabando.github.io/nmrlink/reference/api/#error-codes)も参照してください。
+
+### 任意のローパスフィルター
+
+`analyzeMeasurement(record, { lowpassHz: 1000 })` で、ベースライン補正後に2次Butterworthを前後方向へ適用します。カットオフは全処理後の−3 dB周波数です。先頭の送信過渡を除くため、FFT開始時刻から取得末尾までを処理し、それ以前の表示データは未処理のまま残します。未指定または `null` は従来の解析です。rawは変更せず、data・spectrumがフィルター後、baseline.dataがフィルター前です。lowpassにはカットオフ・開始時刻・方式・パディング・処理区間のデータを返します。
+
+`lowpassFilter(data, { sampleIntervalMs, cutoffHz })` は、渡された2チャンネルの全配列を同一係数で処理し、新しいdataと条件を返す独立関数です。4点以上のデータと、0より大きくナイキスト周波数未満のカットオフが必要です。狭いLPFは信号自体も減衰させ、端点の波形に影響します。受信基準を共鳴に近づけ、未処理との比較で判断してください。

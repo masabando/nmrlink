@@ -14,7 +14,7 @@ export default function ReferencePage() {
       <h2>機能から探す</h2>
       <ul>
         <li><Link href="/reference/api/measurement">接続・測定</Link>：NMRController、NMRDevice、測定条件・記録、時間の見積もり</li>
-        <li><Link href="/reference/api/analysis">信号解析</Link>：analyzeMeasurement、correctBaseline、computeSpectrum</li>
+        <li><Link href="/reference/api/analysis">信号解析</Link>：analyzeMeasurement、correctBaseline、lowpassFilter、computeSpectrum</li>
         <li><Link href="/reference/api/graphs">グラフ</Link>：NMRGraphs、SVG生成、言語・ラベル・色</li>
         <li><Link href="/reference/api/files">保存・読み込み</Link>：JSON、PNG、取得日時、走査JSONの復元</li>
         <li><Link href="/reference/api/sweeps">周波数走査・パルス校正</Link>：走査計画、停止、共通位相とサイン近似</li>
@@ -56,6 +56,7 @@ try {
       <ReferenceTable headings={["codeの例", "意味・details"]} rows={[
         ["INVALID_PARAMETER_RANGE", "測定条件の範囲外。name・minimum・maximum"],
         ["INVALID_FFT_RANGE / INSUFFICIENT_FFT_SAMPLES", "FFT区間の不正 / 選択点数不足"],
+        ["INVALID_LOWPASS", "LPFのカットオフ・サンプル間隔の不正 / 点数不足"],
         ["INVALID_JSON / RECORD_TOO_LARGE", "JSON構文不正 / 測定JSONの容量超過"],
         ["NO_REFERENCE_SIGNAL", "共通基準に使える信号がない"],
         ["DEVICE_NOT_CONNECTED / DEVICE_BUSY", "未接続 / 別の装置操作中"],

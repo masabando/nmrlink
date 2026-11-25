@@ -157,3 +157,9 @@ try {
 MIT. Author: Masamitsu Bando. See the LICENSE file included in the package.
 
 The original Python program provided by Yasushi Kondo is also available under MIT in the repository's [`original/` directory](https://github.com/masabando/nmrlink/tree/main/original), with its own copyright notice. It is not included in this npm package.
+
+### Optional low-pass filtering
+
+`analyzeMeasurement(record, { lowpassHz: 1000 })` applies a second-order Butterworth filter forward and backward after baseline correction. The cutoff is the final −3 dB frequency. Filtering starts at the FFT start and continues to the acquisition end, excluding earlier transmit transients; earlier waveform samples remain unfiltered. Omitting `lowpassHz` or using `null` preserves the original analysis. Raw samples are never modified. Filtered output is in `data` and `spectrum`; `baseline.data` remains unfiltered. `lowpass` records the cutoff, start, method, padding and filtered segment.
+
+The standalone `lowpassFilter(data, { sampleIntervalMs, cutoffHz })` filters the entire supplied two-channel array and returns a new `data` array and metadata. Both channels use the same coefficients. It requires at least four samples and a positive cutoff below Nyquist. Narrow filtering can attenuate resonance and distort waveform endpoints; tune the receiver reference close to resonance and compare with unfiltered data before interpreting amplitudes.

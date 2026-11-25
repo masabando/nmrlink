@@ -19,6 +19,7 @@ const messages = Object.freeze({
   "INVALID_PNG_SCALE": "PNG scale must be greater than zero and at most 4.",
   "INVALID_PNG_DIMENSIONS": "PNG dimensions must be positive and within 8192 pixels and 16 megapixels.",
   "INVALID_FFT_RANGE": "FFT range must satisfy 0 <= startMs < endMs <= acquisition duration, with a positive sampleIntervalMs.",
+  "INVALID_LOWPASS": "LPF requires finite sampling and cutoff values, 0 < cutoffHz < Nyquist, and at least four samples.",
   "INVALID_WINDOW": "Window must be hann or rect.",
   "INSUFFICIENT_FFT_SAMPLES": "FFT requires at least four selected samples.",
   "INVALID_BASELINE_TAIL": "tailPoints must be an integer from 1 to the sample count.",

@@ -11,6 +11,7 @@ export {
 export { LineDecoder } from "./line-decoder.js";
 export { WebSerialTransport } from "./web-serial-transport.js";
 export { NMRDevice } from "./device.js";
+export { lowpassFilter } from "./lowpass.js";
 export { correctBaseline } from "./baseline.js";
 export { computeSpectrum } from "./fft.js";
 export { analyzeMeasurement } from "./analysis.js";
